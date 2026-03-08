@@ -1,33 +1,9 @@
 {
   "overall": {
-    "1": {
-      "username": "kryspin2009",
-      "region": "EU",
-      "tags": [
-        "HT1"
-      ]
-    },
-    "2": {
-      "username": "clayandrew",
-      "region": "AU",
-      "tags": [
-        "HT4"
-      ]
-    },
-    "3": {
-      "username": "unknown",
-      "region": "EU",
-      "tags": [
-        "HT4"
-      ]
-    },
-    "4": {
-      "username": "DanielRabbit",
-      "region": "EU",
-      "tags": [
-        "HT5"
-      ]
-    },
+    "1": null,
+    "2": null,
+    "3": null,
+    "4": null,
     "5": null,
     "6": null,
     "7": null,
@@ -36,34 +12,11 @@
     "10": null
   },
   "dsm": {
-    "tier-1": [
-      {
-        "username": "kryspin2009",
-        "highTier": true,
-        "region": "EU"
-      }
-    ],
+    "tier-1": [],
     "tier-2": [],
     "tier-3": [],
-    "tier-4": [
-      {
-        "username": "clayandrew",
-        "highTier": true,
-        "region": "AU"
-      },
-      {
-        "username": "unknown",
-        "highTier": true,
-        "region": "EU"
-      }
-    ],
-    "tier-5": [
-      {
-        "username": "DanielRabbit",
-        "highTier": true,
-        "region": "EU"
-      }
-    ]
+    "tier-4": [],
+    "tier-5": []
   },
   "updatedAt": "2026-03-08T14:19:51.446Z"
 }
