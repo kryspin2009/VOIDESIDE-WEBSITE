@@ -1284,6 +1284,9 @@ async function handleWebhookRoute(req, res, routeLabel) {
 
 app.get("/api/tiers", handleTiersRead);
 app.get("/tiers", handleTiersRead);
+app.get("/healthz", (_req, res) => {
+  res.status(200).json({ ok: true });
+});
 
 [
   "/api/tiers",

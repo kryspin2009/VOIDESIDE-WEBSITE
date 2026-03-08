@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: voideside-website-api
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /healthz
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: TIER_SECRET
+        sync: false
+      - key: DISCORD_BOT_TOKEN
+        sync: false
+      - key: DISCORD_SOURCE_CHANNEL_IDS
+        sync: false
+      - key: DISCORD_SOURCE_GUILD_IDS
+        sync: false
+      - key: DISCORD_SOURCE_BOT_IDS
+        sync: false
+      - key: DISCORD_RESULT_PREFIX
+        sync: false
+      - key: DISCORD_ACCEPT_BOT_MESSAGES
+        value: "true"
+      - key: DISCORD_ACCEPT_HUMAN_MESSAGES
+        value: "false"
+      - key: TIERS_CORS_ORIGINS
+        sync: false
