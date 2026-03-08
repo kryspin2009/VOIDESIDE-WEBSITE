@@ -1017,6 +1017,227 @@ async function writeState(state) {
   await fs.writeFile(DATA_FILE, `${JSON.stringify(state, null, 2)}\n`, "utf8");
 }
 
+function applyBulkSyncPayload(state, body) {
+  if (body?.overall && typeof body.overall === "object") {
+    const stagedOverall = Object.fromEntries(
+      OVERALL_TIERS.map((rankKey) => [rankKey, sanitizeOverallEntry(state.overall[rankKey], null)])
+    );
+
+    Object.entries(body.overall).forEach(([slot, value]) => {
+      const parsed = parseOverallTierInput(slot);
+      if (!parsed) {
+        return;
+      }
+
+      stagedOverall[parsed.rank] = sanitizeOverallEntry(value, parsed.fallbackTag);
+    });
+
+    writeOverallEntriesByPoints(state, Object.values(stagedOverall).filter(Boolean));
+  }
+
+  if (body?.dsm && typeof body.dsm === "object") {
+    DSM_TIERS.forEach((tier) => {
+      if (Object.prototype.hasOwnProperty.call(body.dsm, tier)) {
+        const nextList = Array.isArray(body.dsm[tier]) ? body.dsm[tier] : [];
+        state.dsm[tier] = nextList.map((entry) => sanitizeDsmEntry(entry)).filter(Boolean);
+      }
+    });
+
+    rebuildOverallFromDsm(state);
+  }
+}
+
+function applyDsmResultsPayload(state, results, { replace = false } = {}) {
+  const safeResults = Array.isArray(results) ? results : [];
+  if (!safeResults.length) {
+    return { error: "results array is required", status: 400 };
+  }
+
+  if (replace) {
+    DSM_TIERS.forEach((tierKey) => {
+      state.dsm[tierKey] = [];
+    });
+  }
+
+  const applied = [];
+  const rejected = [];
+
+  safeResults.forEach((row, index) => {
+    const addResult = addOrMoveDsmUser(state, {
+      tierInput: row?.tier,
+      usernameInput: row?.username,
+      highTierInput: row?.highTier,
+      positionInput: row?.position,
+      regionInput: row?.region
+    });
+
+    if (addResult.error) {
+      rejected.push({ index, error: addResult.error });
+      return;
+    }
+
+    applied.push({
+      index,
+      tier: addResult.tier,
+      username: addResult.value.username,
+      highTier: addResult.value.highTier
+    });
+  });
+
+  if (!applied.length) {
+    return { error: "No valid DSM results to apply", rejected, status: 400 };
+  }
+
+  rebuildOverallFromDsm(state);
+  applied.forEach((entry) => {
+    entry.overallTier = getOverallRankByUsername(state, entry.username);
+  });
+
+  return {
+    ok: true,
+    mode: "dsm",
+    applied,
+    rejected
+  };
+}
+
+function applySingleTierUpdatePayload(state, body) {
+  const mode = String(body?.mode || "dsm").trim().toLowerCase();
+  const tier = String(body?.tier || body?.rank || "").trim();
+  const op = String(body?.op || "set").trim().toLowerCase();
+
+  if (mode === "overall") {
+    const parsedTier = parseOverallTierInput(tier);
+    if (!parsedTier) {
+      return { error: `Invalid overall tier '${tier}'. Use 1-10 (or rank1-rank10).`, status: 400 };
+    }
+
+    const explicitTagInput = body?.tags ?? body?.tag ?? body?.tierTag ?? body?.overallTag ?? null;
+    const explicitFallbackTag = normalizeOverallTierTag(explicitTagInput);
+    const effectiveFallbackTag = explicitFallbackTag || parsedTier.fallbackTag;
+    const targetRank = parsedTier.rank;
+
+    if (op === "clear") {
+      state.overall[targetRank] = null;
+      writeOverallEntriesByPoints(state, getOverallEntries(state));
+    } else {
+      const entry = sanitizeOverallEntry(
+        {
+          username: body?.username,
+          region: body?.region,
+          tags: explicitTagInput
+        },
+        effectiveFallbackTag
+      );
+
+      if (!entry) {
+        return { error: "username and at least one tier tag (HT1-LT5) are required for overall set", status: 400 };
+      }
+
+      const nextEntries = getOverallEntries(state).filter(
+        (current) => current.username.toLowerCase() !== entry.username.toLowerCase()
+      );
+      nextEntries.push(entry);
+      writeOverallEntriesByPoints(state, nextEntries);
+    }
+
+    const resolvedRank =
+      op === "clear"
+        ? targetRank
+        : OVERALL_TIERS.find((rankKey) => {
+          const current = state.overall[rankKey];
+          return current && String(current.username || "").toLowerCase() === String(body?.username || "").toLowerCase();
+        }) || null;
+
+    return {
+      ok: true,
+      mode,
+      tier: targetRank,
+      resolvedRank,
+      value: resolvedRank ? state.overall[resolvedRank] : state.overall[targetRank]
+    };
+  }
+
+  if (mode !== "dsm") {
+    return { error: `Invalid mode '${mode}', use 'overall' or 'dsm'`, status: 400 };
+  }
+
+  const username = normalizeUsername(body?.username);
+  const parsedTier = parseDsmTierInput(tier);
+
+  if (op === "clear") {
+    if (!parsedTier) {
+      return { error: `Invalid DSM tier '${tier}'`, status: 400 };
+    }
+
+    state.dsm[parsedTier.tier] = [];
+    rebuildOverallFromDsm(state);
+    return { ok: true, mode, tier: parsedTier.tier, value: [] };
+  }
+
+  if (op === "remove") {
+    if (!username) {
+      return { error: "username is required for dsm remove", status: 400 };
+    }
+
+    removeDsmUserEverywhere(state, username);
+    rebuildOverallFromDsm(state);
+    return {
+      ok: true,
+      mode,
+      tier: parsedTier ? parsedTier.tier : null,
+      removed: username,
+      overallTier: getOverallRankByUsername(state, username)
+    };
+  }
+
+  const addResult = addOrMoveDsmUser(state, {
+    tierInput: tier,
+    usernameInput: body?.username,
+    highTierInput: body?.highTier,
+    positionInput: body?.position,
+    regionInput: body?.region
+  });
+
+  if (addResult.error) {
+    return { error: addResult.error, status: 400 };
+  }
+
+  rebuildOverallFromDsm(state);
+  const overallTier = getOverallRankByUsername(state, addResult.value.username);
+  return {
+    ok: true,
+    mode,
+    tier: addResult.tier,
+    overallTier,
+    player: addResult.value,
+    value: state.dsm[addResult.tier]
+  };
+}
+
+function applyWebhookPayload(state, body) {
+  const safeBody = body && typeof body === "object" ? body : {};
+
+  if (safeBody.overall || safeBody.dsm) {
+    applyBulkSyncPayload(state, safeBody);
+    return { ok: true, mode: "bulk" };
+  }
+
+  const groupedResults = Array.isArray(safeBody.results)
+    ? safeBody.results
+    : Array.isArray(safeBody.players)
+      ? safeBody.players
+      : Array.isArray(safeBody.entries)
+        ? safeBody.entries
+        : null;
+
+  if (groupedResults) {
+    return applyDsmResultsPayload(state, groupedResults, { replace: Boolean(safeBody.replace) });
+  }
+
+  return applySingleTierUpdatePayload(state, safeBody);
+}
+
 function requireSecret(req, res, next) {
   const expected = process.env.TIER_SECRET;
   if (!expected) {
@@ -1039,6 +1260,63 @@ app.get("/api/tiers", async (_req, res) => {
   } catch (error) {
     console.error("GET /api/tiers failed:", error);
     res.status(500).json({ error: "Failed to read tier data" });
+  }
+});
+
+app.post("/api/tiers", requireSecret, async (req, res) => {
+  try {
+    const state = await readState();
+    const result = applyWebhookPayload(state, req.body);
+    if (!result.ok) {
+      return res.status(result.status || 400).json(result);
+    }
+
+    await writeState(state);
+    return res.json({
+      ...result,
+      updatedAt: state.updatedAt
+    });
+  } catch (error) {
+    console.error("POST /api/tiers failed:", error);
+    return res.status(500).json({ error: "Failed to sync tiers" });
+  }
+});
+
+app.post("/api/webhook", requireSecret, async (req, res) => {
+  try {
+    const state = await readState();
+    const result = applyWebhookPayload(state, req.body);
+    if (!result.ok) {
+      return res.status(result.status || 400).json(result);
+    }
+
+    await writeState(state);
+    return res.json({
+      ...result,
+      updatedAt: state.updatedAt
+    });
+  } catch (error) {
+    console.error("POST /api/webhook failed:", error);
+    return res.status(500).json({ error: "Failed to sync tiers" });
+  }
+});
+
+app.post("/api/sync", requireSecret, async (req, res) => {
+  try {
+    const state = await readState();
+    const result = applyWebhookPayload(state, req.body);
+    if (!result.ok) {
+      return res.status(result.status || 400).json(result);
+    }
+
+    await writeState(state);
+    return res.json({
+      ...result,
+      updatedAt: state.updatedAt
+    });
+  } catch (error) {
+    console.error("POST /api/sync failed:", error);
+    return res.status(500).json({ error: "Failed to sync tiers" });
   }
 });
 
@@ -1313,7 +1591,7 @@ app.post("/api/reset", requireSecret, async (_req, res) => {
 });
 
 app.get("/", (_req, res) => {
-  res.sendFile(path.join(__dirname, "Untitled-1.html"));
+  res.sendFile(path.join(__dirname, "index.html"));
 });
 
 app.use((error, req, res, next) => {
