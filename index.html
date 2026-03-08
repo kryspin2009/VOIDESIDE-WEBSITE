@@ -1,0 +1,4258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tier List</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@500;600;700;800&family=Rajdhani:wght@700&display=swap" rel="stylesheet">
+
+<style>
+
+:root{
+  --site-zoom:0.9;
+  --bg-0:#17051f;
+  --bg-1:#570c5a;
+  --bg-2:#5a2180d8;
+  --panel:#36124f;
+  --panel-soft:#4a1a67;
+  --line:#7d45a9;
+  --line-soft:#aa6fd6;
+  --text:#f6e9ff;
+  --text-dim:#c6a8de;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:"Exo 2",sans-serif;
+  color:var(--text);
+  zoom:var(--site-zoom);
+  background:
+    radial-gradient(900px 360px at 10% -10%, rgba(177,84,255,0.32), transparent 70%),
+    radial-gradient(900px 380px at 95% -10%, rgba(129,54,206,0.30), transparent 68%),
+    linear-gradient(180deg, var(--bg-1) 0%, var(--bg-0) 55%, #19031f 100%);
+}
+
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 54px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.015) 0, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 54px);
+  opacity:0.35;
+}
+
+.brand-wipe{
+  --wipe-x:50%;
+  --wipe-y:14%;
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:9999;
+  opacity:0;
+  overflow:hidden;
+  background:
+    radial-gradient(1200px 700px at 50% -10%, rgba(122,74,193,0.24), transparent 62%),
+    linear-gradient(180deg, rgba(47,17,77,0.95) 0%, rgba(22,8,44,0.97) 54%, rgba(9,3,21,0.99) 100%);
+  will-change:opacity;
+}
+
+.brand-wipe::before{
+  content:"";
+  position:absolute;
+  left:var(--wipe-x);
+  top:var(--wipe-y);
+  width:260px;
+  height:260px;
+  margin-left:-130px;
+  margin-top:-130px;
+  border-radius:50%;
+  background:radial-gradient(
+    circle,
+    rgba(215,169,255,0.48) 0%,
+    rgba(136,85,204,0.36) 34%,
+    rgba(55,21,96,0.12) 64%,
+    transparent 78%
+  );
+  opacity:0;
+  transform:scale(0.15);
+  transform-origin:center;
+  will-change:transform,opacity;
+}
+
+.brand-wipe-particles,
+.brand-wipe-particles::before,
+.brand-wipe-particles::after{
+  position:absolute;
+  inset:-10%;
+  content:"";
+  pointer-events:none;
+  opacity:0;
+  will-change:transform,opacity;
+}
+
+.brand-wipe-particles{
+  background-image:
+    radial-gradient(rgba(105,59,163,0.44) 1.4px, transparent 1.8px),
+    radial-gradient(rgba(81,43,131,0.38) 1.1px, transparent 1.6px);
+  background-size:120px 120px, 170px 170px;
+  background-position:0 0, 40px 70px;
+}
+
+.brand-wipe-particles::before{
+  background-image:
+    radial-gradient(rgba(95,50,149,0.42) 1.5px, transparent 2px),
+    radial-gradient(rgba(66,34,110,0.38) 1.1px, transparent 1.6px);
+  background-size:145px 145px, 210px 210px;
+  background-position:25px 95px, 90px 30px;
+}
+
+.brand-wipe-particles::after{
+  background-image:
+    radial-gradient(rgba(88,46,139,0.4) 1.6px, transparent 2.1px),
+    radial-gradient(rgba(70,35,114,0.36) 1.2px, transparent 1.7px);
+  background-size:165px 165px, 240px 240px;
+  background-position:15px 35px, 120px 120px;
+}
+
+.brand-wipe-title{
+  position:absolute;
+  left:50%;
+  top:46%;
+  transform:translate(-50%, -50%) scale(0.92);
+  text-align:center;
+  opacity:0;
+  will-change:transform,opacity;
+}
+
+.brand-wipe-title .kicker{
+  margin:0 0 8px;
+  font-family:"Exo 2",sans-serif;
+  font-size:clamp(14px, 2vw, 26px);
+  font-weight:600;
+  letter-spacing:0.2em;
+  text-transform:uppercase;
+  color:#d7b8ff;
+  text-shadow:0 0 20px rgba(181,118,255,0.56);
+}
+
+.brand-wipe-title .main{
+  margin:0;
+  font-family:"Rajdhani",sans-serif;
+  font-size:clamp(38px, 8.5vw, 140px);
+  line-height:0.95;
+  font-weight:700;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  background:linear-gradient(180deg, #f6e9ff 0%, #d8b0ff 48%, #b57dff 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  text-shadow:
+    0 0 28px rgba(218,156,255,0.62),
+    0 0 62px rgba(101,58,166,0.74);
+}
+
+.brand-wipe.play{
+  animation:brandVoidsideCover 1180ms cubic-bezier(.22,.84,.24,1) forwards;
+}
+
+.brand-wipe.play::before{
+  animation:brandVoidsideBurst 1180ms cubic-bezier(.22,.84,.24,1) forwards;
+}
+
+.brand-wipe.play .brand-wipe-particles{
+  animation:brandVoidsideParticlesA 1180ms cubic-bezier(.22,.84,.24,1) forwards;
+}
+
+.brand-wipe.play .brand-wipe-particles::before{
+  animation:brandVoidsideParticlesB 1180ms cubic-bezier(.22,.84,.24,1) forwards;
+}
+
+.brand-wipe.play .brand-wipe-particles::after{
+  animation:brandVoidsideParticlesC 1180ms cubic-bezier(.22,.84,.24,1) forwards;
+}
+
+.brand-wipe.play .brand-wipe-title{
+  animation:brandVoidsideTitle 1180ms cubic-bezier(.22,.84,.24,1) forwards;
+}
+
+@keyframes brandVoidsideCover{
+  0%{
+    opacity:0;
+  }
+  14%{
+    opacity:1;
+  }
+  72%{
+    opacity:1;
+  }
+  100%{
+    opacity:0;
+  }
+}
+
+@keyframes brandVoidsideBurst{
+  0%{
+    opacity:0;
+    transform:scale(0.15);
+  }
+  24%{
+    opacity:0.72;
+  }
+  56%{
+    opacity:0.46;
+    transform:scale(8);
+  }
+  100%{
+    opacity:0;
+    transform:scale(12);
+  }
+}
+
+@keyframes brandVoidsideParticlesA{
+  0%{
+    opacity:0;
+    transform:translate3d(0, 24px, 0) scale(1);
+  }
+  25%{
+    opacity:0.56;
+  }
+  68%{
+    opacity:0.42;
+    transform:translate3d(0, -20px, 0) scale(1.02);
+  }
+  100%{
+    opacity:0;
+    transform:translate3d(0, -64px, 0) scale(1.06);
+  }
+}
+
+@keyframes brandVoidsideParticlesB{
+  0%{
+    opacity:0;
+    transform:translate3d(10px, 30px, 0) scale(1);
+  }
+  22%{
+    opacity:0.5;
+  }
+  62%{
+    opacity:0.38;
+    transform:translate3d(-8px, -18px, 0) scale(1.03);
+  }
+  100%{
+    opacity:0;
+    transform:translate3d(-12px, -58px, 0) scale(1.08);
+  }
+}
+
+@keyframes brandVoidsideParticlesC{
+  0%{
+    opacity:0;
+    transform:translate3d(-8px, 20px, 0) scale(1);
+  }
+  26%{
+    opacity:0.44;
+  }
+  64%{
+    opacity:0.34;
+    transform:translate3d(8px, -24px, 0) scale(1.02);
+  }
+  100%{
+    opacity:0;
+    transform:translate3d(14px, -66px, 0) scale(1.06);
+  }
+}
+
+@keyframes brandVoidsideTitle{
+  0%{
+    opacity:0;
+    transform:translate(-50%, -50%) scale(0.92);
+  }
+  32%{
+    opacity:1;
+    transform:translate(-50%, -50%) scale(1.02);
+  }
+  66%{
+    opacity:0.86;
+    transform:translate(-50%, -50%) scale(1);
+  }
+  100%{
+    opacity:0;
+    transform:translate(-50%, -50%) scale(1.02);
+  }
+}
+
+.page{
+  position:relative;
+  z-index:1;
+  width:min(1600px,94vw);
+  margin:34px auto 44px;
+}
+
+.topbar{
+  display:grid;
+  grid-template-columns:auto 1fr 340px;
+  align-items:center;
+  gap:18px;
+  padding:14px 18px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:linear-gradient(180deg, rgba(39,10,56,0.93), rgba(25,7,40,0.93));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.brand{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  text-decoration:none;
+}
+
+.brand-logo{
+  display:block;
+  width:clamp(200px, 28vw, 200px);
+  height:auto;
+  max-width:100%;
+  object-fit:contain;
+  object-position:center center;
+  filter:
+    drop-shadow(0 0 10px rgba(178,95,255,0.52))
+    drop-shadow(0 10px 16px rgba(0,0,0,0.45));
+}
+
+.brand-accent{
+  color:#8de053;
+}
+
+.nav-links{
+  display:flex;
+  justify-content:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.nav-dropdown{
+  position:relative;
+  display:flex;
+  align-items:center;
+}
+
+.nav-link{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  appearance:none;
+  padding:10px 14px;
+  border:1px solid transparent;
+  border-radius:12px;
+  background:transparent;
+  text-decoration:none;
+  color:var(--text-dim);
+  font-size:20px;
+  font-weight:600;
+  font-family:inherit;
+  cursor:pointer;
+  transition:all 0.2s ease;
+}
+
+.nav-link.active{
+  color:var(--text);
+  border-color:var(--line-soft);
+  background:rgba(152,72,226,0.24);
+}
+
+.nav-link:hover{
+  color:var(--text);
+  border-color:var(--line);
+  background:rgba(93,33,132,0.48);
+}
+
+.nav-link-discord{
+  position:relative;
+}
+
+.nav-caret{
+  width:10px;
+  height:10px;
+  border-right:2px solid currentColor;
+  border-bottom:2px solid currentColor;
+  transform:translateY(-1px) rotate(45deg);
+  transition:transform 0.2s ease;
+}
+
+.nav-dropdown.open .nav-caret{
+  transform:translateY(2px) rotate(225deg);
+}
+
+.discord-menu{
+  position:absolute;
+  top:calc(100% + 14px);
+  left:50%;
+  width:min(560px, calc(100vw - 64px));
+  padding:20px;
+  border:1px solid rgba(170,111,214,0.28);
+  border-radius:24px;
+  background:
+    linear-gradient(180deg, rgba(42,14,66,0.97), rgba(20,7,35,0.97)),
+    radial-gradient(circle at top left, rgba(160,94,234,0.16), transparent 58%);
+  box-shadow:
+    0 24px 56px rgba(0,0,0,0.42),
+    inset 0 1px 0 rgba(255,255,255,0.04);
+  backdrop-filter:blur(18px);
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transform:translateX(-50%) translateY(10px);
+  transition:opacity 0.18s ease, transform 0.18s ease, visibility 0.18s linear;
+  z-index:30;
+}
+
+.nav-dropdown.open .discord-menu{
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+  transform:translateX(-50%) translateY(0);
+}
+
+.discord-menu-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:16px 22px;
+}
+
+.discord-menu-item{
+  display:grid;
+  grid-template-columns:56px 1fr;
+  align-items:center;
+  gap:14px;
+  min-height:56px;
+  padding:0;
+  border:none;
+  border-radius:18px;
+  background:transparent;
+  color:var(--text);
+  font:inherit;
+  text-align:left;
+  text-decoration:none;
+}
+
+button.discord-menu-item{
+  cursor:pointer;
+}
+
+button.discord-menu-item:hover .discord-menu-item-icon,
+button.discord-menu-item:focus-visible .discord-menu-item-icon{
+  border-color:rgba(201,145,255,0.58);
+  background:linear-gradient(180deg, rgba(120,56,184,0.34), rgba(56,24,92,0.6));
+  box-shadow:
+    0 0 0 4px rgba(159,92,232,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+button.discord-menu-item:focus-visible{
+  outline:2px solid rgba(218,175,255,0.72);
+  outline-offset:4px;
+}
+
+.discord-menu-item-icon{
+  display:grid;
+  place-items:center;
+  width:56px;
+  height:56px;
+  border:1px solid rgba(170,111,214,0.26);
+  border-radius:18px;
+  background:linear-gradient(180deg, rgba(64,24,99,0.72), rgba(28,11,49,0.92));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.04);
+  transition:all 0.2s ease;
+}
+
+.discord-menu-item-icon img{
+  width:30px;
+  height:30px;
+  object-fit:contain;
+  filter:drop-shadow(0 0 10px rgba(203,144,255,0.18));
+}
+
+.discord-menu-item-label{
+  font-size:22px;
+  font-weight:700;
+  letter-spacing:0.04em;
+}
+
+.discord-menu-item.empty{
+  min-height:56px;
+  border:1px dashed rgba(170,111,214,0.18);
+  background:rgba(255,255,255,0.02);
+  opacity:0.32;
+}
+
+.search{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 14px;
+  min-width:0;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:rgba(53,18,78,0.66);
+}
+
+.search input{
+  width:100%;
+  border:none;
+  outline:none;
+  background:transparent;
+  color:var(--text);
+  font-size:20px;
+  font-weight:500;
+}
+
+.search input::placeholder{
+  color:#b392d4;
+}
+
+.search-results{
+  position:absolute;
+  top:calc(100% + 12px);
+  left:0;
+  right:0;
+  z-index:25;
+  display:none;
+  padding:8px;
+  border:1px solid rgba(114,76,164,0.9);
+  border-radius:18px;
+  background:linear-gradient(180deg, rgba(25,11,41,0.98) 0%, rgba(14,8,26,0.99) 100%);
+  box-shadow:0 22px 40px rgba(0,0,0,0.44), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.search-results.open{
+  display:grid;
+  gap:6px;
+}
+
+.search-result{
+  width:100%;
+  border:1px solid transparent;
+  border-radius:14px;
+  padding:9px 10px;
+  display:grid;
+  grid-template-columns:34px minmax(0, 1fr) auto;
+  align-items:center;
+  gap:10px;
+  background:rgba(56,25,82,0.72);
+  color:var(--text);
+  font-family:"Exo 2",sans-serif;
+  text-align:left;
+  cursor:pointer;
+  transition:background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.search-result:hover,
+.search-result:focus-visible{
+  outline:none;
+  transform:translateY(-1px);
+  border-color:rgba(181,114,239,0.72);
+  background:rgba(76,35,111,0.9);
+}
+
+.search-result-avatar{
+  width:34px;
+  height:34px;
+  border-radius:8px;
+  border:1px solid rgba(217,184,255,0.28);
+  object-fit:cover;
+  image-rendering:pixelated;
+}
+
+.search-result-name{
+  display:block;
+  color:#f4f6ff;
+  font-size:17px;
+  font-weight:700;
+  line-height:1.05;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.search-result-meta{
+  display:block;
+  margin-top:3px;
+  color:#c7abd9;
+  font-size:12px;
+  font-weight:600;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.search-result-rank{
+  min-width:54px;
+  color:#9ec2ff;
+  font-size:13px;
+  font-weight:800;
+  text-align:right;
+  white-space:nowrap;
+}
+
+.search-empty{
+  padding:12px 14px;
+  border-radius:14px;
+  background:rgba(42,20,62,0.7);
+  color:#c7abd9;
+  font-size:14px;
+  font-weight:600;
+}
+
+.search-icon{
+  position:relative;
+  width:15px;
+  height:15px;
+  border:2px solid #c4a5f0;
+  border-radius:50%;
+  flex:0 0 auto;
+}
+
+.search-icon::after{
+  content:"";
+  position:absolute;
+  right:-5px;
+  bottom:-5px;
+  width:7px;
+  height:2px;
+  background:#c4a5f0;
+  border-radius:2px;
+  transform:rotate(45deg);
+}
+
+.mode-tabs{
+  display:flex;
+  gap:10px;
+  margin-top:22px;
+  overflow-x:auto;
+  padding-bottom:4px;
+}
+
+.mode-tabs::-webkit-scrollbar{
+  height:6px;
+}
+
+.mode-tabs::-webkit-scrollbar-thumb{
+  background:#5d2d82;
+  border-radius:999px;
+}
+
+.mode-tab{
+  flex:1;
+  min-width:112px;
+  padding:12px 10px 10px;
+  border:1px solid var(--line);
+  border-bottom:none;
+  border-radius:20px 20px 0 0;
+  background:linear-gradient(180deg, rgba(43,13,63,0.95), rgba(26,8,41,0.89));
+  color:#b79bd6;
+  font-family:"Exo 2",sans-serif;
+  font-size:24px;
+  font-weight:700;
+  line-height:1.1;
+  white-space:normal;
+  cursor:pointer;
+}
+
+.mode-tab .tab-ico{
+  display:block;
+  width:34px;
+  margin:0 auto 8px;
+  font-family:"Rajdhani",sans-serif;
+  font-size:19px;
+  line-height:1;
+  color:#d2baf3;
+}
+
+.mode-tab .tab-ico-image{
+  width:36px;
+  height:36px;
+  margin-bottom:6px;
+  object-fit:contain;
+  filter:drop-shadow(0 0 7px rgba(126,205,255,0.5));
+}
+
+.mode-tab.active{
+  position:relative;
+  color:var(--text);
+  border-color:var(--line-soft);
+  background:linear-gradient(180deg, rgba(71,24,102,0.93), rgba(36,11,57,0.93));
+}
+
+.mode-tab.active::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:-1px;
+  height:3px;
+  background:#f3ddff;
+}
+
+.view-pane{
+  display:none;
+}
+
+.view-pane.active{
+  display:block;
+}
+
+.board{
+  margin-top:-1px;
+  border:1px solid var(--line);
+  border-radius:0 18px 18px 18px;
+  background:linear-gradient(180deg, rgba(34,11,53,0.95), rgba(20,7,35,0.93));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.board-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:18px;
+  padding:20px;
+  border-bottom:1px solid rgba(114,60,161,0.58);
+}
+
+.eyebrow{
+  margin:0;
+  color:#b296d5;
+  letter-spacing:1.2px;
+  text-transform:uppercase;
+  font-size:15px;
+}
+
+h1{
+  margin:4px 0 0;
+  font-size:36px;
+  font-weight:800;
+  letter-spacing:0.3px;
+}
+
+.info-pill{
+  padding:11px 16px;
+  border:1px solid #7d45a9;
+  border-radius:12px;
+  background:rgba(72,29,110,0.68);
+  color:#f7ebff;
+  font-family:"Exo 2",sans-serif;
+  font-size:18px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.tier-grid{
+  padding:14px 12px 16px;
+}
+
+.tier{
+  display:grid;
+  grid-template-columns:190px 1fr;
+  margin:10px 0;
+  border:1px solid rgba(93,48,136,0.78);
+  border-radius:15px;
+  overflow:hidden;
+  background:rgba(42,13,63,0.78);
+  --label-a:#5c2a79;
+  --label-b:#3f1f57;
+  --panel-a:#2f1246;
+  --panel-b:#220d36;
+}
+
+.tier-label{
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:12px;
+  padding:0 14px;
+  clip-path:polygon(0 0, 86% 0, 100% 50%, 86% 100%, 0 100%);
+  font-family:"Rajdhani",sans-serif;
+  color:#12051e;
+}
+
+.rank-no{
+  font-size:52px;
+  font-weight:700;
+  line-height:1;
+  font-style:italic;
+  color:#f6fbff;
+  text-shadow:0 3px 0 rgba(0,0,0,0.28);
+}
+
+.rank-skin{
+  width:58px;
+  height:58px;
+  border-radius:10px;
+  border:none;
+  background:transparent;
+  object-fit:cover;
+  image-rendering:pixelated;
+}
+
+.tier .tier-label{
+  background:linear-gradient(145deg, var(--label-a) 0%, var(--label-b) 100%);
+}
+
+.tier .tier-items{
+  background:linear-gradient(90deg, var(--panel-a), var(--panel-b));
+}
+
+.tier:nth-child(1){
+  --label-a:#f3c548;
+  --label-b:#deac3c;
+  --panel-a:#31124b;
+  --panel-b:#230d37;
+}
+
+.tier:nth-child(2){
+  --label-a:#a8bcc7;
+  --label-b:#8ea3b3;
+  --panel-a:#301247;
+  --panel-b:#230d37;
+}
+
+.tier:nth-child(3){
+  --label-a:#c5793d;
+  --label-b:#ad642f;
+  --panel-a:#301247;
+  --panel-b:#230d37;
+}
+
+.tier-items{
+  min-height:95px;
+  padding:10px;
+  display:flex;
+  flex-wrap:wrap;
+  align-content:flex-start;
+  gap:10px;
+  background:linear-gradient(90deg, var(--panel-a), var(--panel-b));
+  overflow-x:auto;
+  overflow-y:hidden;
+}
+
+.tier-items::-webkit-scrollbar{
+  height:6px;
+}
+
+.tier-items::-webkit-scrollbar-thumb{
+  background:#6a3b92;
+  border-radius:999px;
+}
+
+.tier-items:empty::before{
+  content:"Drop players here";
+  color:#a884c9;
+  font-size:14px;
+  align-self:center;
+}
+
+.dsm-view .tier-items:empty::before{
+  content:"";
+}
+
+.dsm-board{
+  overflow:hidden;
+}
+
+.dsm-wrap{
+  padding:14px 12px 16px;
+}
+
+.dsm-grid{
+  display:grid;
+  grid-template-columns:repeat(5, minmax(220px, 1fr));
+  gap:10px;
+  overflow-x:auto;
+}
+
+.dsm-grid::-webkit-scrollbar{
+  height:6px;
+}
+
+.dsm-grid::-webkit-scrollbar-thumb{
+  background:#6a3b92;
+  border-radius:999px;
+}
+
+.dsm-col{
+  border:1px solid rgba(108,61,157,0.82);
+  border-radius:12px;
+  overflow:hidden;
+  background:linear-gradient(180deg, rgba(47,16,69,0.95), rgba(28,10,44,0.96));
+  min-width:220px;
+}
+
+.dsm-head{
+  height:62px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  font-size:45px;
+  font-weight:700;
+  border-bottom:1px solid rgba(255,255,255,0.07);
+}
+
+.dsm-head .cup{
+  font-size:28px;
+  line-height:1;
+}
+
+.dsm-col.tier-1 .dsm-head{
+  color:#f5c24a;
+  background:linear-gradient(95deg, rgba(93,74,30,0.85), rgba(72,58,25,0.82));
+}
+
+.dsm-col.tier-2 .dsm-head{
+  color:#bfcddd;
+  background:linear-gradient(95deg, rgba(70,80,99,0.85), rgba(58,69,89,0.82));
+}
+
+.dsm-col.tier-3 .dsm-head{
+  color:#d68b4d;
+  background:linear-gradient(95deg, rgba(80,52,37,0.85), rgba(67,45,34,0.82));
+}
+
+.dsm-col.tier-4 .dsm-head{
+  color:#d3b5ff;
+  background:linear-gradient(95deg, rgba(84,36,122,0.86), rgba(61,27,93,0.84));
+}
+
+.dsm-col.tier-5 .dsm-head{
+  color:#e1cbff;
+  background:linear-gradient(95deg, rgba(68,30,104,0.86), rgba(49,22,78,0.84));
+}
+
+.dsm-list{
+  display:grid;
+}
+
+.dsm-row{
+  min-height:46px;
+  padding:0 10px 0 0;
+  display:grid;
+  grid-template-columns:0 minmax(0, 1fr) auto;
+  align-items:stretch;
+  gap:0;
+  border-top:1px solid rgba(9,17,28,0.6);
+  border-bottom:1px solid rgba(103,56,150,0.52);
+  background:rgba(58,24,84,0.89);
+  cursor:pointer;
+  overflow:hidden;
+  transition:grid-template-columns 0.18s ease, background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.dsm-row:nth-child(odd){
+  background:rgba(75,30,108,0.9);
+}
+
+.dsm-row:hover,
+.dsm-row:focus-visible{
+  grid-template-columns:56px minmax(0, 1fr) auto;
+}
+
+.dsm-row:hover{
+  transform:translateY(-1px);
+  box-shadow:0 10px 18px rgba(0,0,0,0.24);
+}
+
+.dsm-row:focus-visible{
+  outline:none;
+  box-shadow:0 0 0 3px rgba(181,114,239,0.26), 0 10px 18px rgba(0,0,0,0.24);
+}
+
+.dsm-region-drawer{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  white-space:nowrap;
+  border-right:1px solid transparent;
+  font-size:16px;
+  font-weight:800;
+  letter-spacing:0.5px;
+  line-height:1;
+  opacity:0;
+  transform:translateX(-8px);
+  transition:opacity 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
+}
+
+.dsm-row:hover .dsm-region-drawer,
+.dsm-row:focus-visible .dsm-region-drawer{
+  opacity:1;
+  transform:translateX(0);
+}
+
+.dsm-region-drawer.na{
+  background:linear-gradient(180deg, rgba(125,55,92,0.96), rgba(95,43,73,0.98));
+  border-right-color:rgba(176,92,133,0.22);
+  color:#ff7da0;
+}
+
+.dsm-region-drawer.eu{
+  background:linear-gradient(180deg, rgba(42,119,96,0.96), rgba(30,93,82,0.98));
+  border-right-color:rgba(103,197,164,0.22);
+  color:#92efb7;
+}
+
+.dsm-region-drawer.au{
+  background:linear-gradient(180deg, rgba(208,128,49,0.95), rgba(165,89,28,0.98));
+  border-right-color:rgba(255,189,102,0.22);
+  color:#ffd18d;
+}
+
+.dsm-region-drawer.as{
+  background:linear-gradient(180deg, rgba(58,102,180,0.95), rgba(43,72,140,0.98));
+  border-right-color:rgba(132,177,255,0.24);
+  color:#b9d9ff;
+}
+
+.dsm-region-drawer.unknown{
+  background:linear-gradient(180deg, rgba(79,89,108,0.94), rgba(54,61,77,0.98));
+  border-right-color:rgba(194,208,230,0.16);
+  color:#e0eafc;
+}
+
+.dsm-row.region-na{
+  border-left:2px solid rgba(176,92,133,0.72);
+}
+
+.dsm-row.region-eu{
+  border-left:2px solid rgba(103,197,164,0.74);
+}
+
+.dsm-row.region-au{
+  border-left:2px solid rgba(255,189,102,0.72);
+}
+
+.dsm-row.region-as{
+  border-left:2px solid rgba(132,177,255,0.76);
+}
+
+.dsm-row.region-unknown{
+  border-left:2px solid rgba(194,208,230,0.4);
+}
+
+.dsm-player{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:7px 0 7px 10px;
+}
+
+.dsm-avatar{
+  width:28px;
+  height:28px;
+  border-radius:5px;
+  border:1px solid rgba(217,184,255,0.34);
+  flex:0 0 auto;
+  object-fit:cover;
+  image-rendering:pixelated;
+}
+
+.dsm-name{
+  color:#f2f6ff;
+  font-size:34px;
+  font-weight:600;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.dsm-arrows{
+  min-width:18px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  align-self:center;
+  padding-left:8px;
+  line-height:0.8;
+  color:#b094d8;
+  font-size:18px;
+  font-weight:800;
+  opacity:0.9;
+}
+
+.dsm-arrows.single span:last-child{
+  display:none;
+}
+
+.dsm-arrows.double{
+  color:#d1adff;
+}
+
+.item{
+  width:100%;
+  min-height:84px;
+  min-width:700px;
+  border:1px solid #8048aa;
+  border-radius:14px;
+  padding:10px 12px;
+  display:grid;
+  grid-template-columns:minmax(220px,1fr) 84px minmax(320px, auto);
+  align-items:center;
+  gap:14px;
+  background:linear-gradient(95deg, rgba(70,29,103,0.95), rgba(34,12,53,0.96));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.06), 0 10px 16px rgba(0,0,0,0.3);
+  cursor:pointer;
+  user-select:none;
+  transition:transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.item:hover{
+  transform:translateY(-1px);
+  border-color:#b573ef;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.08), 0 16px 24px rgba(0,0,0,0.34);
+}
+
+.item:focus-visible{
+  outline:none;
+  border-color:#dfb4ff;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    0 0 0 3px rgba(181,114,239,0.26),
+    0 16px 24px rgba(0,0,0,0.34);
+}
+
+.player-meta{
+  min-width:0;
+}
+
+.name{
+  max-width:100%;
+  color:#f0f5ff;
+  font-size:23px;
+  font-weight:700;
+  line-height:1.05;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.player-sub{
+  margin-top:5px;
+  color:#cfafea;
+  font-size:15px;
+  font-weight:500;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.points{
+  color:#b58fd6;
+}
+
+.region{
+  width:74px;
+  height:42px;
+  display:grid;
+  place-items:center;
+  justify-self:center;
+  padding:0;
+  border-radius:10px;
+  border:1px solid transparent;
+  font-size:15px;
+  font-weight:800;
+  letter-spacing:0.4px;
+}
+
+.region.na{
+  background:linear-gradient(180deg, rgba(125,55,92,0.54), rgba(95,43,73,0.54));
+  border-color:rgba(176,92,133,0.2);
+  color:#ff6c8f;
+}
+
+.region.eu{
+  background:linear-gradient(180deg, rgba(42,119,96,0.55), rgba(30,93,82,0.55));
+  border-color:rgba(103,197,164,0.2);
+  color:#7be5a5;
+}
+
+.region.au{
+  background:linear-gradient(180deg, rgba(208,128,49,0.56), rgba(165,89,28,0.56));
+  border-color:rgba(255,189,102,0.2);
+  color:#ffd18d;
+}
+
+.region.as{
+  background:linear-gradient(180deg, rgba(58,102,180,0.56), rgba(43,72,140,0.56));
+  border-color:rgba(132,177,255,0.22);
+  color:#b9d9ff;
+}
+
+.region.unknown{
+  background:linear-gradient(180deg, rgba(79,89,108,0.5), rgba(54,61,77,0.52));
+  border-color:rgba(194,208,230,0.18);
+  color:#d8e3f7;
+}
+
+.tier-tags{
+  display:flex;
+  flex-wrap:nowrap;
+  justify-content:flex-end;
+  align-items:flex-end;
+  gap:6px;
+  min-width:0;
+}
+
+.tier-tag{
+  --tag-color:#dac6ed;
+  --tag-border:rgba(177,135,214,0.2);
+  --tag-bg:rgba(177,135,214,0.18);
+  --tag-icon-ring:rgba(205,164,245,0.55);
+  --tag-icon-bg:radial-gradient(circle at 30% 30%, rgba(143,94,201,0.55), rgba(34,13,53,0.95));
+  width:52px;
+  height:58px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  padding:2px 2px 3px;
+  border-radius:14px;
+  font-size:13px;
+  font-weight:700;
+  line-height:1;
+  letter-spacing:0.2px;
+  border:1px solid var(--tag-border);
+  color:var(--tag-color);
+  background:var(--tag-bg);
+  box-sizing:border-box;
+  text-transform:uppercase;
+}
+
+.tier-tag::before{
+  content:"";
+  width:26px;
+  height:26px;
+  border-radius:50%;
+  border:2px solid var(--tag-icon-ring);
+  background:var(--tag-icon-bg);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.06),
+    0 0 10px rgba(95,52,148,0.35);
+}
+
+.tier-tag.source-dsm::before{
+  background:
+    url("./assets/dsm.png") center/64% 64% no-repeat,
+    rgba(17,29,50,0.96);
+  box-shadow:none;
+}
+
+.tier-tag.t1{
+  --tag-color:#f5c34f;
+  --tag-border:rgba(245,195,79,0.2);
+  --tag-bg:rgba(245,195,79,0.16);
+  --tag-icon-ring:rgba(245,195,79,0.7);
+  --tag-icon-bg:radial-gradient(circle at 28% 28%, rgba(255,224,128,0.48), rgba(69,47,18,0.95));
+}
+
+.tier-tag.t2{
+  --tag-color:#c8d3e1;
+  --tag-border:rgba(200,211,225,0.2);
+  --tag-bg:rgba(200,211,225,0.14);
+  --tag-icon-ring:rgba(191,205,222,0.7);
+  --tag-icon-bg:radial-gradient(circle at 28% 28%, rgba(219,228,239,0.42), rgba(52,63,78,0.95));
+}
+
+.tier-tag.t3{
+  --tag-color:#d18a4a;
+  --tag-border:rgba(209,138,74,0.2);
+  --tag-bg:rgba(209,138,74,0.15);
+  --tag-icon-ring:rgba(214,139,77,0.72);
+  --tag-icon-bg:radial-gradient(circle at 28% 28%, rgba(238,173,121,0.43), rgba(72,42,25,0.95));
+}
+
+.tier-tag.t4{
+  --tag-color:#ceabff;
+  --tag-border:rgba(206,171,255,0.24);
+  --tag-bg:rgba(206,171,255,0.15);
+  --tag-icon-ring:rgba(206,171,255,0.72);
+  --tag-icon-bg:radial-gradient(circle at 28% 28%, rgba(218,187,255,0.45), rgba(58,32,88,0.95));
+}
+
+.tier-tag.t5{
+  --tag-color:#bb9ce9;
+  --tag-border:rgba(187,156,233,0.2);
+  --tag-bg:rgba(187,156,233,0.14);
+  --tag-icon-ring:rgba(187,156,233,0.68);
+  --tag-icon-bg:radial-gradient(circle at 28% 28%, rgba(203,176,242,0.42), rgba(49,30,76,0.95));
+}
+
+.tier-tag.t1.lt{
+  --tag-color:#d7b45b;
+  --tag-border:rgba(215,180,91,0.18);
+  --tag-bg:rgba(215,180,91,0.13);
+  --tag-icon-ring:rgba(215,180,91,0.64);
+  --tag-icon-bg:radial-gradient(circle at 28% 28%, rgba(229,201,128,0.36), rgba(60,47,22,0.95));
+}
+
+.tier-tag.t2.lt{
+  --tag-color:#a7b4c5;
+  --tag-border:rgba(167,180,197,0.18);
+  --tag-bg:rgba(167,180,197,0.12);
+  --tag-icon-ring:rgba(167,180,197,0.58);
+  --tag-icon-bg:radial-gradient(circle at 28% 28%, rgba(182,194,210,0.34), rgba(45,55,68,0.95));
+}
+
+.tier-tag.t3.lt{
+  --tag-color:#b5845f;
+  --tag-border:rgba(181,132,95,0.18);
+  --tag-bg:rgba(181,132,95,0.12);
+  --tag-icon-ring:rgba(181,132,95,0.58);
+  --tag-icon-bg:radial-gradient(circle at 28% 28%, rgba(197,152,118,0.34), rgba(56,38,27,0.95));
+}
+
+.tier-tag.t4.lt{
+  --tag-color:#b896dd;
+  --tag-border:rgba(184,150,221,0.2);
+  --tag-bg:rgba(184,150,221,0.14);
+  --tag-icon-ring:rgba(184,150,221,0.62);
+  --tag-icon-bg:radial-gradient(circle at 28% 28%, rgba(198,168,232,0.36), rgba(52,31,80,0.95));
+}
+
+.tier-tag.t5.lt{
+  --tag-color:#9a86bd;
+  --tag-border:rgba(154,134,189,0.18);
+  --tag-bg:rgba(154,134,189,0.12);
+  --tag-icon-ring:rgba(154,134,189,0.56);
+  --tag-icon-bg:radial-gradient(circle at 28% 28%, rgba(172,152,201,0.34), rgba(45,30,68,0.95));
+}
+
+.tier-tag.empty{
+  --tag-color:#8ca0bd;
+  --tag-border:rgba(107,127,158,0.28);
+  --tag-bg:rgba(18,29,48,0.72);
+  --tag-icon-ring:rgba(83,103,133,0.56);
+  --tag-icon-bg:radial-gradient(circle at 28% 28%, rgba(56,73,101,0.36), rgba(17,27,44,0.95));
+}
+
+.title-label{
+  font-weight:700;
+}
+
+.title-grandmaster{
+  color:#f2c94f;
+}
+
+.title-master{
+  color:#ffc74a;
+}
+
+.title-ace{
+  color:#f06a96;
+}
+
+.title-specialist{
+  color:#c49bf2;
+}
+
+.title-cadet{
+  color:#d2b0ff;
+}
+
+.title-novice{
+  color:#c7a2ff;
+}
+
+.title-rookie{
+  color:#c2a8d3;
+}
+
+.player-modal{
+  position:fixed;
+  inset:0;
+  z-index:55;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  background:rgba(8,3,18,0.76);
+  backdrop-filter:blur(7px);
+}
+
+.player-modal.open{
+  display:flex;
+}
+
+.player-card{
+  position:relative;
+  width:min(560px, 100%);
+  overflow:visible;
+  border:1px solid rgba(114,76,164,0.92);
+  border-radius:28px;
+  padding:22px 20px 18px;
+  background:
+    radial-gradient(120% 120% at 0% 0%, rgba(76,40,128,0.34), transparent 48%),
+    linear-gradient(180deg, rgba(20,31,59,0.98) 0%, rgba(14,26,51,0.98) 52%, rgba(12,21,43,0.99) 100%);
+  box-shadow:
+    0 28px 60px rgba(0,0,0,0.52),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+.player-close{
+  position:absolute;
+  top:14px;
+  right:14px;
+  width:50px;
+  height:50px;
+  border:none;
+  border-radius:50%;
+  background:rgba(79,95,128,0.42);
+  color:#edf3ff;
+  font-size:34px;
+  line-height:1;
+  cursor:pointer;
+  transition:background 0.18s ease, transform 0.18s ease;
+}
+
+.player-close:hover,
+.player-close:focus-visible{
+  background:rgba(103,122,161,0.56);
+  transform:scale(1.03);
+  outline:none;
+}
+
+.player-modal-top{
+  display:grid;
+  justify-items:center;
+  text-align:center;
+  gap:8px;
+  padding-top:4px;
+}
+
+.player-avatar-wrap{
+  width:120px;
+  height:120px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  border:3px solid #f0c14b;
+  background:radial-gradient(circle at 50% 28%, rgba(92,130,195,0.24), rgba(15,26,50,0.92));
+  box-shadow:0 14px 28px rgba(0,0,0,0.32);
+}
+
+.player-avatar{
+  width:90px;
+  height:90px;
+  display:block;
+  object-fit:cover;
+  image-rendering:pixelated;
+}
+
+.player-name{
+  margin:0;
+  color:#f4f6ff;
+  font-size:clamp(30px, 5vw, 46px);
+  font-weight:800;
+  line-height:0.98;
+  letter-spacing:0.01em;
+}
+
+.player-title-pill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  min-height:42px;
+  padding:8px 16px;
+  border-radius:999px;
+  font-size:16px;
+  font-weight:800;
+  letter-spacing:0.01em;
+  background:rgba(102,101,53,0.34);
+  border:1px solid rgba(255,227,125,0.24);
+  color:#ffe04d;
+}
+
+.player-title-pill::before{
+  content:"\2726";
+  font-size:18px;
+  line-height:1;
+}
+
+.player-title-pill.title-grandmaster{
+  background:linear-gradient(180deg, rgba(114,103,41,0.62), rgba(90,82,31,0.58));
+  border-color:rgba(255,224,94,0.3);
+  color:#ffe04d;
+}
+
+.player-title-pill.title-master{
+  background:linear-gradient(180deg, rgba(116,79,27,0.58), rgba(88,57,17,0.54));
+  border-color:rgba(255,196,97,0.28);
+  color:#ffc65d;
+}
+
+.player-title-pill.title-ace{
+  background:linear-gradient(180deg, rgba(122,48,83,0.6), rgba(93,33,61,0.58));
+  border-color:rgba(240,106,150,0.25);
+  color:#ff8cb2;
+}
+
+.player-title-pill.title-specialist{
+  background:linear-gradient(180deg, rgba(91,56,128,0.6), rgba(65,37,97,0.56));
+  border-color:rgba(196,155,242,0.24);
+  color:#dab7ff;
+}
+
+.player-title-pill.title-cadet,
+.player-title-pill.title-novice,
+.player-title-pill.title-rookie{
+  background:linear-gradient(180deg, rgba(67,87,124,0.5), rgba(45,61,91,0.48));
+  border-color:rgba(198,218,255,0.18);
+  color:#d9e7ff;
+}
+
+.player-region-label{
+  color:#89a4d7;
+  font-size:20px;
+  font-weight:700;
+}
+
+.player-actions{
+  display:flex;
+  justify-content:center;
+  margin-top:2px;
+}
+
+.player-link{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  min-height:38px;
+  padding:8px 14px;
+  border-radius:14px;
+  border:1px solid rgba(115,137,188,0.28);
+  background:rgba(41,62,102,0.72);
+  color:#d4e4ff;
+  text-decoration:none;
+  font-size:15px;
+  font-weight:700;
+}
+
+.player-link:hover,
+.player-link:focus-visible{
+  outline:none;
+  background:rgba(55,81,131,0.84);
+}
+
+.player-link-icon{
+  width:26px;
+  height:26px;
+  display:grid;
+  place-items:center;
+  border-radius:8px;
+  background:#05070d;
+  color:#f4f6ff;
+  font-size:16px;
+  font-weight:900;
+}
+
+.player-sections{
+  display:grid;
+  gap:12px;
+  margin-top:18px;
+}
+
+.player-section-title{
+  margin:0 0 8px;
+  color:#d5ddef;
+  font-size:18px;
+  font-weight:500;
+  letter-spacing:0.04em;
+  text-transform:uppercase;
+}
+
+.player-position-card{
+  display:grid;
+  grid-template-columns:118px 1fr;
+  align-items:stretch;
+  overflow:hidden;
+  border:1px solid rgba(83,108,154,0.52);
+  border-radius:16px;
+  background:rgba(20,34,63,0.76);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.player-position-rank{
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  padding:0 14px;
+  font-family:"Rajdhani",sans-serif;
+  font-size:46px;
+  font-style:italic;
+  font-weight:700;
+  color:#fff7df;
+  background:linear-gradient(145deg, #f0c047 0%, #dca630 100%);
+  clip-path:polygon(0 0, 88% 0, 100% 50%, 88% 100%, 0 100%);
+  text-shadow:0 3px 0 rgba(0,0,0,0.2);
+}
+
+.player-position-copy{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:6px;
+  padding:0 16px 0 10px;
+}
+
+.player-position-mode{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  color:#fff8e4;
+  font-size:22px;
+  font-weight:800;
+  letter-spacing:0.01em;
+  text-transform:uppercase;
+}
+
+.player-position-mode .icon{
+  color:#ffc52f;
+  font-size:24px;
+}
+
+.player-position-points{
+  color:#9db7e1;
+  font-size:18px;
+  font-weight:700;
+}
+
+.player-tier-box{
+  border:1px solid rgba(83,108,154,0.52);
+  border-radius:16px;
+  padding:14px;
+  background:rgba(20,34,63,0.76);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.player-tier-list{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:10px;
+}
+
+.player-tier-list .tier-tag{
+  width:52px;
+  height:58px;
+}
+
+.player-tier-empty{
+  color:#9bb0d6;
+  font-size:16px;
+  font-weight:600;
+}
+
+.info-modal{
+  position:fixed;
+  inset:0;
+  z-index:40;
+  display:none;
+  pointer-events:none;
+}
+
+.info-modal.open{
+  display:block;
+  pointer-events:auto;
+}
+
+.info-card{
+  position:absolute;
+  top:var(--info-top, 108px);
+  left:var(--info-left, 20px);
+  width:min(var(--info-width, 448px), calc(100vw - 24px));
+  max-height:var(--info-max-height, min(520px, calc(100vh - 24px)));
+  overflow:auto;
+  border:1px solid rgba(48,70,109,0.92);
+  border-radius:18px;
+  background:linear-gradient(180deg, rgba(13,21,37,0.98) 0%, rgba(9,16,29,0.98) 100%);
+  box-shadow:0 24px 44px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+  padding:12px;
+  opacity:0;
+  transform:translateY(-8px) scale(0.98);
+  transform-origin:top right;
+  transition:opacity 140ms ease, transform 140ms ease;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(96,119,165,0.7) transparent;
+}
+
+.info-modal.open .info-card{
+  opacity:1;
+  transform:none;
+}
+
+.info-switch{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:4px;
+  margin-bottom:14px;
+  border-radius:14px;
+  background:rgba(34,48,76,0.92);
+  padding:4px;
+}
+
+.info-tab{
+  border:1px solid transparent;
+  border-radius:10px;
+  background:transparent;
+  color:#96a8c7;
+  font-family:"Exo 2",sans-serif;
+  font-size:15px;
+  font-weight:700;
+  padding:8px 10px;
+  cursor:pointer;
+}
+
+.info-tab.active{
+  border-color:rgba(86,114,162,0.88);
+  background:rgba(52,67,97,0.96);
+  color:#f2f6ff;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.info-panel{
+  display:none;
+}
+
+.info-panel.active{
+  display:block;
+}
+
+.info-headline{
+  margin:2px 0 14px;
+  font-size:17px;
+  line-height:1.35;
+  color:#f3f7ff;
+}
+
+.info-link{
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
+
+.points-group{
+  margin-bottom:12px;
+}
+
+.points-tier{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:16px;
+  font-weight:700;
+  margin-bottom:8px;
+}
+
+.points-tier .icon{
+  width:20px;
+  text-align:center;
+}
+
+.points-tier.t1{
+  color:#f5c443;
+}
+
+.points-tier.t2{
+  color:#ceb3ea;
+}
+
+.points-tier.t3{
+  color:#c78243;
+}
+
+.points-tier.t4,
+.points-tier.t5{
+  color:#d9c4f1;
+}
+
+.points-row{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.point-pill{
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:12px;
+  font-weight:700;
+  line-height:1;
+}
+
+.point-pill.ht{
+  color:#f4c44c;
+  background:rgba(244,196,76,0.16);
+}
+
+.point-pill.lt{
+  color:#d8c1ef;
+  background:rgba(184,148,224,0.18);
+}
+
+.title-list{
+  margin:0;
+  padding:0;
+  list-style:none;
+  display:grid;
+  gap:12px;
+}
+
+.title-item{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:10px;
+}
+
+.title-icon{
+  font-size:18px;
+  line-height:1;
+  margin-top:2px;
+}
+
+.title-copy{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+
+.title-name{
+  font-size:15px;
+  font-weight:700;
+}
+
+.title-desc{
+  color:#95a4bf;
+  font-size:12px;
+  line-height:1.4;
+}
+
+@media (max-width: 1200px){
+  .topbar{
+    grid-template-columns:1fr;
+  }
+
+  .brand{
+    justify-self:center;
+  }
+
+  .nav-links{
+    justify-content:center;
+  }
+
+  .search{
+    width:min(520px,100%);
+    margin:0 auto;
+  }
+}
+
+@media (max-width: 840px){
+  .page{
+    width:96vw;
+  }
+
+  .mode-tab{
+    flex:0 0 120px;
+  }
+
+  .tier{
+    grid-template-columns:150px 1fr;
+  }
+
+  .rank-no{
+    font-size:42px;
+  }
+
+  .item{
+    min-width:620px;
+    grid-template-columns:minmax(170px,1fr) 80px minmax(300px, auto);
+    gap:10px;
+    padding:9px 10px;
+  }
+
+  .tier-tags{
+    justify-content:flex-end;
+  }
+
+  .player-card{
+    padding:20px 16px 16px;
+  }
+
+}
+
+@media (max-width: 580px){
+  .brand-logo{
+    width:min(90vw, 220px);
+    height:auto;
+  }
+
+  .nav-link{
+    font-size:16px;
+    padding:8px 10px;
+  }
+
+  .discord-menu{
+    width:min(360px, calc(100vw - 20px));
+    padding:16px;
+    top:calc(100% + 10px);
+  }
+
+  .discord-menu-grid{
+    grid-template-columns:1fr;
+    gap:14px;
+  }
+
+  .discord-menu-item-label{
+    font-size:18px;
+  }
+
+  .discord-menu-item.empty{
+    min-height:48px;
+  }
+
+  .search input{
+    font-size:16px;
+  }
+
+  .mode-tab{
+    font-size:17px;
+  }
+
+  .mode-tab .tab-ico{
+    width:28px;
+    font-size:14px;
+  }
+
+  .mode-tab .tab-ico-image{
+    width:30px;
+    height:30px;
+    margin-bottom:5px;
+  }
+
+  .board-head{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  h1{
+    font-size:30px;
+  }
+
+  .info-pill{
+    font-size:16px;
+  }
+
+  .name{
+    font-size:18px;
+  }
+
+  .player-sub{
+    font-size:13px;
+  }
+
+  .item{
+    min-width:560px;
+    grid-template-columns:minmax(150px,1fr) 74px minmax(280px, auto);
+  }
+
+  .player-modal{
+    padding:12px;
+  }
+
+  .player-card{
+    border-radius:22px;
+    padding:18px 12px 14px;
+  }
+
+  .player-close{
+    top:12px;
+    right:12px;
+    width:42px;
+    height:42px;
+    font-size:30px;
+  }
+
+  .player-avatar-wrap{
+    width:100px;
+    height:100px;
+  }
+
+  .player-avatar{
+    width:76px;
+    height:76px;
+  }
+
+  .player-name{
+    font-size:30px;
+  }
+
+  .player-title-pill{
+    padding:7px 12px;
+    font-size:15px;
+  }
+
+  .player-region-label{
+    font-size:17px;
+  }
+
+  .player-section-title{
+    font-size:16px;
+  }
+
+  .player-position-card{
+    grid-template-columns:90px 1fr;
+  }
+
+  .player-position-rank{
+    padding:0 12px;
+    font-size:44px;
+  }
+
+  .player-position-copy{
+    padding:10px;
+  }
+
+  .player-position-mode{
+    font-size:18px;
+  }
+
+  .player-position-points{
+    font-size:15px;
+  }
+
+  .player-tier-list{
+    gap:8px;
+  }
+
+  .player-tier-list .tier-tag{
+    width:48px;
+    height:54px;
+  }
+
+  .info-headline{
+    font-size:31px;
+  }
+
+  .points-tier{
+    font-size:30px;
+  }
+
+  .point-pill{
+    font-size:24px;
+  }
+
+  .info-tab{
+    font-size:25px;
+  }
+
+  .title-name{
+    font-size:31px;
+  }
+}
+
+@media (max-height: 760px){
+  .player-modal{
+    padding:14px;
+  }
+
+  .player-card{
+    padding:18px 16px 14px;
+  }
+
+  .player-avatar-wrap{
+    width:104px;
+    height:104px;
+  }
+
+  .player-avatar{
+    width:80px;
+    height:80px;
+  }
+
+  .player-name{
+    font-size:32px;
+  }
+
+  .player-title-pill{
+    min-height:38px;
+    padding:7px 14px;
+    font-size:15px;
+  }
+
+  .player-region-label{
+    font-size:18px;
+  }
+
+  .player-sections{
+    gap:10px;
+    margin-top:14px;
+  }
+
+  .player-position-rank{
+    font-size:40px;
+  }
+
+  .player-position-mode{
+    font-size:19px;
+  }
+
+  .player-position-points{
+    font-size:16px;
+  }
+}
+
+@media (max-height: 680px){
+  .player-modal{
+    padding:10px;
+  }
+
+  .player-card{
+    padding:16px 14px 12px;
+  }
+
+  .player-close{
+    width:40px;
+    height:40px;
+    font-size:28px;
+  }
+
+  .player-avatar-wrap{
+    width:92px;
+    height:92px;
+  }
+
+  .player-avatar{
+    width:70px;
+    height:70px;
+  }
+
+  .player-name{
+    font-size:28px;
+  }
+
+  .player-link{
+    min-height:34px;
+    padding:7px 12px;
+    font-size:14px;
+  }
+
+  .player-position-card{
+    grid-template-columns:82px 1fr;
+  }
+
+  .player-position-rank{
+    padding:0 10px;
+    font-size:34px;
+  }
+
+  .player-position-mode{
+    font-size:17px;
+  }
+
+  .player-position-points{
+    font-size:14px;
+  }
+
+  .player-tier-list .tier-tag{
+    width:44px;
+    height:50px;
+    gap:2px;
+    font-size:11px;
+  }
+
+  .player-tier-list .tier-tag::before{
+    width:22px;
+    height:22px;
+  }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="brand-wipe" id="brand-wipe" aria-hidden="true">
+  <div class="brand-wipe-particles" aria-hidden="true"></div>
+  <div class="brand-wipe-title" aria-hidden="true">
+    <p class="kicker">Combat Rankings</p>
+    <h2 class="main">Voidside Tiers</h2>
+  </div>
+</div>
+
+<div class="page">
+  <header class="topbar">
+    <a class="brand" href="#overall-view" aria-label="Voidside Tiers">
+      <img class="brand-logo" src="./assets/voidside-tiers-cropped.png" alt="Voidside Tiers">
+    </a>
+
+    <nav class="nav-links">
+      <button class="nav-link active" type="button" data-nav-home="true">Home</button>
+      <div class="nav-dropdown" data-discord-menu>
+        <button
+          class="nav-link nav-link-discord"
+          type="button"
+          data-discord-toggle="true"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-controls="discord-menu-panel"
+        >
+          <span>Discords</span>
+          <span class="nav-caret" aria-hidden="true"></span>
+        </button>
+
+        <div class="discord-menu" id="discord-menu-panel">
+          <div class="discord-menu-grid">
+            <a
+              class="discord-menu-item"
+              href="https://discord.gg/vb4TmfRybN"
+              target="_blank"
+              rel="noreferrer noopener"
+              data-discord-link="true"
+            >
+              <span class="discord-menu-item-icon" aria-hidden="true">
+                <img src="./assets/dsm.png" alt="">
+              </span>
+              <span class="discord-menu-item-label">DSM</span>
+            </a>
+            <span class="discord-menu-item empty" aria-hidden="true"></span>
+            <span class="discord-menu-item empty" aria-hidden="true"></span>
+            <span class="discord-menu-item empty" aria-hidden="true"></span>
+            <span class="discord-menu-item empty" aria-hidden="true"></span>
+            <span class="discord-menu-item empty" aria-hidden="true"></span>
+            <span class="discord-menu-item empty" aria-hidden="true"></span>
+            <span class="discord-menu-item empty" aria-hidden="true"></span>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div class="search" id="player-search">
+      <span class="search-icon" aria-hidden="true"></span>
+      <input id="player-search-input" type="text" placeholder="Search player..." autocomplete="off" spellcheck="false">
+      <div class="search-results" id="player-search-results" aria-label="Player search results"></div>
+    </div>
+  </header>
+
+  <div class="mode-tabs" id="mode-tabs" role="tablist" aria-label="Ranking categories"></div>
+
+  <div class="view-pane active" id="overall-view">
+  <section class="board">
+    <div class="board-head">
+      <div>
+        <p class="eyebrow">Combat Rankings</p>
+        <h1>Overall</h1>
+      </div>
+      <button class="info-pill" type="button" data-open-info="true">Information</button>
+    </div>
+
+    <div class="tier-grid">
+      <div class="tier">
+      <div class="tier-label">
+        <span class="rank-no">1.</span>
+        <img class="rank-skin" src="https://render.crafty.gg/3d/bust/d219c8ee-d32e-4da2-b22e-0aa69d36c88a" alt="Rank 1 skin">
+      </div>
+      <div class="tier-items" id="rank1">
+        <div class="item">
+          <div class="player-meta">
+            <div class="name">Marlowww</div>
+            <div class="player-sub">Combat Grandmaster <span class="points">(452 points)</span></div>
+          </div>
+          <div class="region na">NA</div>
+          <div class="tier-tags">
+            <span class="tier-tag">HT1</span><span class="tier-tag">HT1</span><span class="tier-tag">HT1</span><span class="tier-tag lt">LT1</span>
+            <span class="tier-tag">HT1</span><span class="tier-tag">HT1</span><span class="tier-tag lt">LT1</span><span class="tier-tag lt">LT1</span>
+          </div>
+        </div>
+      </div>
+      </div>
+
+      <div class="tier">
+      <div class="tier-label"><span class="rank-no">2.</span><img class="rank-skin" src="https://render.crafty.gg/3d/bust/d219c8ee-d32e-4da2-b22e-0aa69d36c88a" alt="Rank 2 skin"></div>
+      <div class="tier-items" id="rank2">
+        <div class="item">
+          <div class="player-meta">
+            <div class="name">ItzRealMe</div>
+            <div class="player-sub">Combat Master <span class="points">(336 points)</span></div>
+          </div>
+          <div class="region na">NA</div>
+          <div class="tier-tags">
+            <span class="tier-tag">HT3</span><span class="tier-tag">HT1</span><span class="tier-tag">HT1</span><span class="tier-tag">HT1</span>
+            <span class="tier-tag">HT1</span><span class="tier-tag lt">LT2</span><span class="tier-tag lt">LT2</span><span class="tier-tag lt">LT2</span>
+          </div>
+        </div>
+      </div>
+      </div>
+
+      <div class="tier">
+      <div class="tier-label"><span class="rank-no">3.</span><img class="rank-skin" src="https://render.crafty.gg/3d/bust/d219c8ee-d32e-4da2-b22e-0aa69d36c88a" alt="Rank 3 skin"></div>
+      <div class="tier-items" id="rank3">
+        <div class="item">
+          <div class="player-meta">
+            <div class="name">coldified</div>
+            <div class="player-sub">Combat Master <span class="points">(297 points)</span></div>
+          </div>
+          <div class="region eu">EU</div>
+          <div class="tier-tags">
+            <span class="tier-tag lt">LT1</span><span class="tier-tag lt">LT1</span><span class="tier-tag lt">LT1</span><span class="tier-tag lt">LT2</span>
+            <span class="tier-tag lt">LT2</span><span class="tier-tag">HT3</span><span class="tier-tag">HT1</span><span class="tier-tag lt">LT2</span>
+          </div>
+        </div>
+      </div>
+      </div>
+
+      <div class="tier">
+      <div class="tier-label"><span class="rank-no">4.</span><img class="rank-skin" src="https://render.crafty.gg/3d/bust/d219c8ee-d32e-4da2-b22e-0aa69d36c88a" alt="Rank 4 skin"></div>
+      <div class="tier-items" id="rank4">
+        <div class="item">
+          <div class="player-meta">
+            <div class="name">Swight</div>
+            <div class="player-sub">Combat Elite <span class="points">(289 points)</span></div>
+          </div>
+          <div class="region na">NA</div>
+          <div class="tier-tags">
+            <span class="tier-tag">HT1</span><span class="tier-tag">HT1</span><span class="tier-tag lt">LT2</span><span class="tier-tag lt">LT2</span>
+            <span class="tier-tag lt">LT2</span><span class="tier-tag">HT3</span><span class="tier-tag">HT3</span><span class="tier-tag">HT1</span>
+          </div>
+        </div>
+      </div>
+      </div>
+
+      <div class="tier">
+      <div class="tier-label"><span class="rank-no">5.</span><img class="rank-skin" src="https://render.crafty.gg/3d/bust/d219c8ee-d32e-4da2-b22e-0aa69d36c88a" alt="Rank 5 skin"></div>
+      <div class="tier-items" id="rank5">
+        <div class="item">
+          <div class="player-meta">
+            <div class="name">janekv</div>
+            <div class="player-sub">Combat Ace <span class="points">(232 points)</span></div>
+          </div>
+          <div class="region eu">EU</div>
+          <div class="tier-tags">
+            <span class="tier-tag lt">LT1</span><span class="tier-tag lt">LT2</span><span class="tier-tag lt">LT2</span><span class="tier-tag">HT3</span>
+            <span class="tier-tag">HT3</span><span class="tier-tag">HT4</span><span class="tier-tag">HT1</span><span class="tier-tag lt">LT1</span>
+          </div>
+        </div>
+      </div>
+      </div>
+
+      <div class="tier">
+      <div class="tier-label"><span class="rank-no">6.</span><img class="rank-skin" src="https://render.crafty.gg/3d/bust/d219c8ee-d32e-4da2-b22e-0aa69d36c88a" alt="Rank 6 skin"></div>
+      <div class="tier-items" id="rank6">
+        <div class="item">
+          <div class="player-meta">
+            <div class="name">Axoid</div>
+            <div class="player-sub">Combat Veteran <span class="points">(218 points)</span></div>
+          </div>
+          <div class="region na">NA</div>
+          <div class="tier-tags">
+            <span class="tier-tag lt">LT2</span><span class="tier-tag lt">LT2</span><span class="tier-tag">HT2</span><span class="tier-tag">HT3</span>
+            <span class="tier-tag lt">LT3</span><span class="tier-tag">HT2</span><span class="tier-tag lt">LT1</span><span class="tier-tag">HT2</span>
+          </div>
+        </div>
+      </div>
+      </div>
+
+      <div class="tier">
+      <div class="tier-label"><span class="rank-no">7.</span><img class="rank-skin" src="https://render.crafty.gg/3d/bust/d219c8ee-d32e-4da2-b22e-0aa69d36c88a" alt="Rank 7 skin"></div>
+      <div class="tier-items" id="rank7">
+        <div class="item">
+          <div class="player-meta">
+            <div class="name">Vanlor</div>
+            <div class="player-sub">Combat Captain <span class="points">(204 points)</span></div>
+          </div>
+          <div class="region eu">EU</div>
+          <div class="tier-tags">
+            <span class="tier-tag">HT2</span><span class="tier-tag lt">LT2</span><span class="tier-tag lt">LT3</span><span class="tier-tag">HT3</span>
+            <span class="tier-tag lt">LT2</span><span class="tier-tag lt">LT3</span><span class="tier-tag">HT2</span><span class="tier-tag lt">LT2</span>
+          </div>
+        </div>
+      </div>
+      </div>
+
+      <div class="tier">
+      <div class="tier-label"><span class="rank-no">8.</span><img class="rank-skin" src="https://render.crafty.gg/3d/bust/d219c8ee-d32e-4da2-b22e-0aa69d36c88a" alt="Rank 8 skin"></div>
+      <div class="tier-items" id="rank8">
+        <div class="item">
+          <div class="player-meta">
+            <div class="name">NethOP</div>
+            <div class="player-sub">Combat Challenger <span class="points">(186 points)</span></div>
+          </div>
+          <div class="region na">NA</div>
+          <div class="tier-tags">
+            <span class="tier-tag lt">LT3</span><span class="tier-tag lt">LT2</span><span class="tier-tag lt">LT3</span><span class="tier-tag">HT4</span>
+            <span class="tier-tag">HT2</span><span class="tier-tag lt">LT2</span><span class="tier-tag lt">LT3</span><span class="tier-tag">HT2</span>
+          </div>
+        </div>
+      </div>
+      </div>
+
+      <div class="tier">
+      <div class="tier-label"><span class="rank-no">9.</span><img class="rank-skin" src="https://render.crafty.gg/3d/bust/d219c8ee-d32e-4da2-b22e-0aa69d36c88a" alt="Rank 9 skin"></div>
+      <div class="tier-items" id="rank9">
+        <div class="item">
+          <div class="player-meta">
+            <div class="name">SMPFox</div>
+            <div class="player-sub">Combat Scout <span class="points">(171 points)</span></div>
+          </div>
+          <div class="region eu">EU</div>
+          <div class="tier-tags">
+            <span class="tier-tag lt">LT3</span><span class="tier-tag lt">LT2</span><span class="tier-tag lt">LT4</span><span class="tier-tag">HT3</span>
+            <span class="tier-tag">HT3</span><span class="tier-tag lt">LT3</span><span class="tier-tag lt">LT2</span><span class="tier-tag lt">LT2</span>
+          </div>
+        </div>
+      </div>
+      </div>
+
+      <div class="tier">
+      <div class="tier-label"><span class="rank-no">10.</span><img class="rank-skin" src="https://render.crafty.gg/3d/bust/d219c8ee-d32e-4da2-b22e-0aa69d36c88a" alt="Rank 10 skin"></div>
+      <div class="tier-items" id="rank10">
+        <div class="item">
+          <div class="player-meta">
+            <div class="name">MaceKing</div>
+            <div class="player-sub">Combat Rookie <span class="points">(149 points)</span></div>
+          </div>
+          <div class="region na">NA</div>
+          <div class="tier-tags">
+            <span class="tier-tag lt">LT4</span><span class="tier-tag lt">LT3</span><span class="tier-tag lt">LT4</span><span class="tier-tag lt">LT3</span>
+            <span class="tier-tag lt">LT3</span><span class="tier-tag lt">LT2</span><span class="tier-tag lt">LT4</span><span class="tier-tag lt">LT3</span>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </section>
+  </div>
+  <div id="extra-views"></div>
+</div>
+
+<div class="info-modal" id="info-modal" aria-hidden="true">
+  <div class="info-card" role="dialog" aria-modal="true" aria-labelledby="info-headline" tabindex="-1">
+    <div class="info-switch" role="tablist" aria-label="Information tabs">
+      <button class="info-tab active" type="button" data-info-tab="titles" role="tab" aria-selected="true">Titles</button>
+      <button class="info-tab" type="button" data-info-tab="points" role="tab" aria-selected="false">Points</button>
+    </div>
+
+    <section class="info-panel active" data-info-panel="titles" role="tabpanel">
+      <h2 class="info-headline" id="info-headline">How to obtain <span class="info-link">Achievement Titles</span></h2>
+      <ul class="title-list">
+        <li class="title-item">
+          <span class="title-icon title-grandmaster">&#10022;</span>
+          <div class="title-copy">
+            <span class="title-name title-grandmaster">Combat Grandmaster</span>
+            <span class="title-desc">Obtained 400+ total points.</span>
+          </div>
+        </li>
+        <li class="title-item">
+          <span class="title-icon title-master">&#10022;</span>
+          <div class="title-copy">
+            <span class="title-name title-master">Combat Master</span>
+            <span class="title-desc">Obtained 250+ total points.</span>
+          </div>
+        </li>
+        <li class="title-item">
+          <span class="title-icon title-ace">&#10022;</span>
+          <div class="title-copy">
+            <span class="title-name title-ace">Combat Ace</span>
+            <span class="title-desc">Obtained 100+ total points.</span>
+          </div>
+        </li>
+        <li class="title-item">
+          <span class="title-icon title-specialist">&#10022;</span>
+          <div class="title-copy">
+            <span class="title-name title-specialist">Combat Specialist</span>
+            <span class="title-desc">Obtained 50+ total points.</span>
+          </div>
+        </li>
+        <li class="title-item">
+          <span class="title-icon title-cadet">&#10022;</span>
+          <div class="title-copy">
+            <span class="title-name title-cadet">Combat Cadet</span>
+            <span class="title-desc">Obtained 20+ total points.</span>
+          </div>
+        </li>
+        <li class="title-item">
+          <span class="title-icon title-novice">&#10022;</span>
+          <div class="title-copy">
+            <span class="title-name title-novice">Combat Novice</span>
+            <span class="title-desc">Obtained 10+ total points.</span>
+          </div>
+        </li>
+        <li class="title-item">
+          <span class="title-icon title-rookie">&#10022;</span>
+          <div class="title-copy">
+            <span class="title-name title-rookie">Rookie</span>
+            <span class="title-desc">Starting rank for players with less than 10 points.</span>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <section class="info-panel" data-info-panel="points" role="tabpanel">
+      <h2 class="info-headline">How <span class="info-link">ranking points</span> are calculated</h2>
+
+      <div class="points-group">
+        <div class="points-tier t1"><span class="icon">&#127942;</span>Tier 1</div>
+        <div class="points-row">
+          <span class="point-pill ht">60 Points</span>
+          <span class="point-pill ht">45 Points</span>
+        </div>
+      </div>
+
+      <div class="points-group">
+        <div class="points-tier t2"><span class="icon">&#129352;</span>Tier 2</div>
+        <div class="points-row">
+          <span class="point-pill lt">30 Points</span>
+          <span class="point-pill lt">20 Points</span>
+        </div>
+      </div>
+
+      <div class="points-group">
+        <div class="points-tier t3"><span class="icon">&#129353;</span>Tier 3</div>
+        <div class="points-row">
+          <span class="point-pill ht">10 Points</span>
+          <span class="point-pill lt">6 Points</span>
+        </div>
+      </div>
+
+      <div class="points-group">
+        <div class="points-tier t4"><span class="icon">&#8226;</span>Tier 4</div>
+        <div class="points-row">
+          <span class="point-pill lt">4 Points</span>
+          <span class="point-pill lt">3 Points</span>
+        </div>
+      </div>
+
+      <div class="points-group">
+        <div class="points-tier t5"><span class="icon">&#8226;</span>Tier 5</div>
+        <div class="points-row">
+          <span class="point-pill lt">2 Points</span>
+          <span class="point-pill lt">1 Point</span>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="player-modal" id="player-modal" aria-hidden="true">
+  <div class="player-card" role="dialog" aria-modal="true" aria-labelledby="player-modal-name">
+    <button class="player-close" id="player-modal-close" type="button" aria-label="Close player details">&times;</button>
+
+    <div class="player-modal-top">
+      <div class="player-avatar-wrap">
+        <img class="player-avatar" id="player-modal-avatar" src="https://render.crafty.gg/3d/bust/Notch" alt="Player skin">
+      </div>
+      <h2 class="player-name" id="player-modal-name">Player</h2>
+      <div class="player-title-pill title-rookie" id="player-modal-title">Rookie</div>
+      <div class="player-region-label" id="player-modal-region">N/A</div>
+
+      <div class="player-actions">
+        <a class="player-link" id="player-modal-link" href="https://namemc.com/profile/Notch" target="_blank" rel="noreferrer noopener">
+          <span class="player-link-icon">n</span>
+          <span>NameMC</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="player-sections">
+      <section>
+        <h3 class="player-section-title">Position</h3>
+        <div class="player-position-card">
+          <div class="player-position-rank" id="player-modal-rank">1.</div>
+          <div class="player-position-copy">
+            <span class="player-position-mode"><span class="icon">&#127942;</span> Overall</span>
+            <span class="player-position-points" id="player-modal-points">(0 points)</span>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h3 class="player-section-title">Tiers</h3>
+        <div class="player-tier-box">
+          <div class="player-tier-list" id="player-modal-tiers"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+// Add future ranking pages here:
+// kind:"existing" uses a hardcoded HTML view, kind:"blank" auto-generates an empty board,
+// kind:"dsm" generates the 5-column Diamond Spear Mace layout from DSM_TIERS.
+const MODE_VIEWS = [
+  { id:"overall-view", code:"OV", label:"Overall", kind:"existing" },
+  {
+    id:"diamond-spear-mace-view",
+    code:"DSM",
+    label:"Diamond Spear Mace",
+    kind:"dsm",
+    iconSrc:"./assets/dsm.png"
+  }
+];
+
+const OVERALL_RANK_IDS = ["rank1","rank2","rank3","rank4","rank5","rank6","rank7","rank8","rank9","rank10"];
+const LEGACY_OVERALL_IDS = ["ht1","lt1","ht2","lt2","ht3","lt3","ht4","lt4","ht5","lt5"];
+const BLANK_RANKS = ["1.","2.","3.","4.","5.","6.","7.","8.","9.","10."];
+const CLEAR_ALL_PLAYERS = true;
+const DEFAULT_API_TIERS_URL = "./data/tiers.json";
+const API_POLL_MS = 5000;
+const API_TIERS_URL = resolveTierDataUrl();
+const DEFAULT_TAG_SOURCE = "dsm";
+
+const DSM_TIERS = [
+  { key:"tier-1", css:"tier-1", label:"Tier 1", cup:true, highCount:0, players:[] },
+  { key:"tier-2", css:"tier-2", label:"Tier 2", cup:true, highCount:0, players:[] },
+  { key:"tier-3", css:"tier-3", label:"Tier 3", cup:true, highCount:0, players:[] },
+  { key:"tier-4", css:"tier-4", label:"Tier 4", cup:false, highCount:0, players:[] },
+  { key:"tier-5", css:"tier-5", label:"Tier 5", cup:false, highCount:0, players:[] }
+];
+
+const modeTabsHost = document.getElementById("mode-tabs");
+const extraViewsHost = document.getElementById("extra-views");
+const playerSearch = document.getElementById("player-search");
+const playerSearchInput = document.getElementById("player-search-input");
+const playerSearchResults = document.getElementById("player-search-results");
+const infoModal = document.getElementById("info-modal");
+const infoCard = infoModal ? infoModal.querySelector(".info-card") : null;
+const infoTabs = Array.from(document.querySelectorAll(".info-tab"));
+const infoPanels = Array.from(document.querySelectorAll(".info-panel"));
+const playerModal = document.getElementById("player-modal");
+const playerModalAvatar = document.getElementById("player-modal-avatar");
+const playerModalName = document.getElementById("player-modal-name");
+const playerModalTitle = document.getElementById("player-modal-title");
+const playerModalRegion = document.getElementById("player-modal-region");
+const playerModalLink = document.getElementById("player-modal-link");
+const playerModalRank = document.getElementById("player-modal-rank");
+const playerModalPoints = document.getElementById("player-modal-points");
+const playerModalTiers = document.getElementById("player-modal-tiers");
+const playerModalCloseButton = document.getElementById("player-modal-close");
+const homeNavButton = document.querySelector("[data-nav-home]");
+const discordNavDropdown = document.querySelector("[data-discord-menu]");
+const discordNavButton = discordNavDropdown ? discordNavDropdown.querySelector("[data-discord-toggle]") : null;
+const discordMenuPanel = document.getElementById("discord-menu-panel");
+const discordMenuLinks = Array.from(document.querySelectorAll(".discord-menu-item[data-discord-link]"));
+const brandHomeLink = document.querySelector(".brand");
+const brandWipe = document.getElementById("brand-wipe");
+const DEFAULT_SKIN_NAME = "Notch";
+const DEFAULT_BUST_URL = `https://render.crafty.gg/3d/bust/${DEFAULT_SKIN_NAME}`;
+const DEFAULT_AVATAR_URL = `https://mc-heads.net/avatar/${DEFAULT_SKIN_NAME}/32`;
+const BRAND_RESET_VIEW_ID = "overall-view";
+const BRAND_WIPE_SWITCH_MS = 460;
+const INFO_MODAL_MAX_WIDTH = 448;
+const INFO_MODAL_MAX_HEIGHT = 520;
+const INFO_MODAL_MIN_HEIGHT = 180;
+const INFO_MODAL_GUTTER = 12;
+const INFO_MODAL_OFFSET = 10;
+const DISCORD_MENU_CLOSE_DELAY_MS = 140;
+
+let infoAnchorButton = null;
+let activePlayerKey = "";
+let lastPlayerTrigger = null;
+
+function normalizeConfiguredUrl(value){
+  const normalized = String(value || "").trim();
+  return normalized || "";
+}
+
+function resolveTierDataUrl(){
+  const searchParams = new URLSearchParams(window.location.search);
+  const queryValue = searchParams.get("tiersDataUrl") || searchParams.get("data");
+  const globalValue = typeof window.__TIERS_DATA_URL__ === "string" ? window.__TIERS_DATA_URL__ : "";
+  const metaValue = document.querySelector('meta[name="tiers-data-url"]')?.getAttribute("content") || "";
+
+  return normalizeConfiguredUrl(queryValue)
+    || normalizeConfiguredUrl(globalValue)
+    || normalizeConfiguredUrl(metaValue)
+    || DEFAULT_API_TIERS_URL;
+}
+
+function shouldSkipNetworkTierFetch(){
+  if(window.location.protocol !== "file:"){
+    return false;
+  }
+
+  return !/^(?:https?:)?\/\//i.test(API_TIERS_URL);
+}
+let searchablePlayerProfiles = [];
+let discordMenuCloseTimer = null;
+
+const TIER_POINTS = {
+  HT1:60,
+  LT1:45,
+  HT2:30,
+  LT2:20,
+  HT3:10,
+  LT3:6,
+  HT4:4,
+  LT4:3,
+  HT5:2,
+  LT5:1
+};
+const OVERALL_TAG_SLOTS = 8;
+const TIER_TO_RANK_LABEL = {
+  HT1:"HT1",
+  LT1:"LT1",
+  HT2:"HT2",
+  LT2:"LT2",
+  HT3:"HT3",
+  LT3:"LT3",
+  HT4:"HT4",
+  LT4:"LT4",
+  HT5:"HT5",
+  LT5:"LT5"
+};
+
+const TITLE_RULES = [
+  { min:400, name:"Combat Grandmaster", className:"title-grandmaster" },
+  { min:250, name:"Combat Master", className:"title-master" },
+  { min:100, name:"Combat Ace", className:"title-ace" },
+  { min:50, name:"Combat Specialist", className:"title-specialist" },
+  { min:20, name:"Combat Cadet", className:"title-cadet" },
+  { min:10, name:"Combat Novice", className:"title-novice" },
+  { min:0, name:"Rookie", className:"title-rookie" }
+];
+
+function escapeText(value){
+  return String(value).replace(/[&<>"']/g, (char)=>{
+    const map = {
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      "\"":"&quot;",
+      "'":"&#39;"
+    };
+    return map[char] || char;
+  });
+}
+
+function normalizeUsername(value){
+  return String(value || "").trim();
+}
+
+function normalizeRegion(value){
+  const raw = String(value || "").trim().toUpperCase();
+  if(!raw || /^N\s*\/\s*A$/.test(raw) || /^(?:UNKNOWN|NONE|NULL|UNSET)$/.test(raw)){
+    return null;
+  }
+
+  const compact = raw.replace(/[^A-Z]/g, "");
+  if(compact === "EU" || compact === "EUROPE"){
+    return "EU";
+  }
+  if(compact === "NA" || compact === "NORTHAMERICA" || compact === "NORTHAMERICAN"){
+    return "NA";
+  }
+  if(compact === "AU" || compact === "AUS" || compact === "AUSTRALIA" || compact === "OCE" || compact === "OCEANIA"){
+    return "AU";
+  }
+  if(compact === "AS" || compact === "ASIA" || compact === "ASIAN"){
+    return "AS";
+  }
+  return null;
+}
+
+function getRegionMeta(value){
+  const region = normalizeRegion(value);
+  if(region === "EU"){
+    return { code:"EU", className:"eu", label:"Europe" };
+  }
+  if(region === "NA"){
+    return { code:"NA", className:"na", label:"North America" };
+  }
+  if(region === "AU"){
+    return { code:"AU", className:"au", label:"Australia" };
+  }
+  if(region === "AS"){
+    return { code:"AS", className:"as", label:"Asia" };
+  }
+  return { code:"N/A", className:"unknown", label:"N/A" };
+}
+
+function normalizeTierTag(value){
+  const token = String(value || "").trim().toUpperCase();
+  return /^(?:HT|LT)[1-5]$/.test(token) ? token : "";
+}
+
+function normalizeTags(tags, fallbackTag){
+  const cleaned = Array.isArray(tags)
+    ? tags.map((tag)=>normalizeTierTag(tag)).filter(Boolean)
+    : [];
+  if(cleaned.length){
+    return cleaned;
+  }
+
+  const safeFallbackTag = normalizeTierTag(fallbackTag);
+  return safeFallbackTag ? [safeFallbackTag] : [];
+}
+
+function normalizeTagSources(sources, tagCount, fallbackSource){
+  const fallback = String(fallbackSource || DEFAULT_TAG_SOURCE).trim().toLowerCase() || DEFAULT_TAG_SOURCE;
+  if(!Number.isFinite(tagCount) || tagCount <= 0){
+    return [];
+  }
+
+  if(!Array.isArray(sources)){
+    return Array.from({ length:tagCount }, ()=>fallback);
+  }
+
+  return Array.from({ length:tagCount }, (_, index)=>{
+    const source = String(sources[index] || fallback).trim().toLowerCase();
+    return source || fallback;
+  });
+}
+
+function formatTierTagLabel(key){
+  const normalized = String(key || "").trim().toUpperCase();
+  return TIER_TO_RANK_LABEL[normalized] || normalized;
+}
+
+function buildTierTagMarkup(tag, source){
+  const normalizedTag = normalizeTierTag(tag) || "-";
+  const safeSource = normalizedTag !== "-"
+    ? String(source || DEFAULT_TAG_SOURCE).trim().toLowerCase() || DEFAULT_TAG_SOURCE
+    : "";
+  const sourceAttr = safeSource ? ` data-tier-source="${escapeText(safeSource)}"` : "";
+  return `<span class="tier-tag" data-tier-key="${escapeText(normalizedTag)}"${sourceAttr}>${escapeText(formatTierTagLabel(normalizedTag))}</span>`;
+}
+
+function mapDsmToOverallTag(dsmTierKey, highTier){
+  const tierNumber = String(dsmTierKey || "").split("-")[1];
+  if(!tierNumber || !/^[1-5]$/.test(tierNumber)){
+    return "";
+  }
+
+  return `${highTier ? "HT" : "LT"}${tierNumber}`;
+}
+
+function parseOverallSourceKey(rawKey){
+  const compact = String(rawKey || "").trim().toLowerCase().replace(/[\s_-]+/g, "");
+  if(!compact){
+    return null;
+  }
+
+  const directRankMatch = compact.match(/^rank(10|[1-9])$/);
+  if(directRankMatch){
+    return { rankId:`rank${directRankMatch[1]}`, fallbackTag:null };
+  }
+
+  if(/^(10|[1-9])$/.test(compact)){
+    return { rankId:`rank${compact}`, fallbackTag:null };
+  }
+
+  const legacyIndex = LEGACY_OVERALL_IDS.indexOf(compact);
+  if(legacyIndex !== -1){
+    return {
+      rankId: OVERALL_RANK_IDS[legacyIndex],
+      fallbackTag: compact.toUpperCase()
+    };
+  }
+
+  return null;
+}
+
+function calculatePointsFromTags(tags, fallbackTag){
+  return normalizeTags(tags, fallbackTag).reduce((total, tag)=>{
+    return total + (TIER_POINTS[tag] || 0);
+  }, 0);
+}
+
+function collectOverallEntriesFromPayload(overallData){
+  if(!overallData || typeof overallData !== "object"){
+    return [];
+  }
+
+  const byUsername = new Map();
+  Object.entries(overallData).forEach(([sourceKey, value])=>{
+    const parsed = parseOverallSourceKey(sourceKey);
+    if(!parsed || value == null){
+      return;
+    }
+
+    const normalizedValue = typeof value === "string"
+      ? { username:value, region:null, tags:parsed.fallbackTag ? [parsed.fallbackTag] : [] }
+      : value;
+    if(typeof normalizedValue !== "object"){
+      return;
+    }
+
+    const username = normalizeUsername(normalizedValue.username);
+    if(!username){
+      return;
+    }
+
+    const region = normalizeRegion(normalizedValue.region);
+    const tags = normalizeTags(normalizedValue.tags, parsed.fallbackTag);
+    if(!tags.length){
+      return;
+    }
+    const tagSources = normalizeTagSources(
+      normalizedValue.tagSources,
+      tags.length,
+      normalizedValue.tagSource || normalizedValue.source || DEFAULT_TAG_SOURCE
+    );
+    const key = username.toLowerCase();
+    if(!byUsername.has(key)){
+      byUsername.set(key, { player:{ username, region, tags, tagSources }, fallbackTag:parsed.fallbackTag });
+      return;
+    }
+
+    const existing = byUsername.get(key);
+    byUsername.set(key, {
+      player:{
+        username:existing.player.username,
+        region:region || existing.player.region,
+        tags:[...existing.player.tags, ...tags],
+        tagSources:[...normalizeTagSources(existing.player.tagSources, existing.player.tags.length, DEFAULT_TAG_SOURCE), ...tagSources]
+      },
+      fallbackTag:existing.fallbackTag
+    });
+  });
+
+  return Array.from(byUsername.values());
+}
+
+function sortOverallEntriesByPoints(entries){
+  return [...entries].sort((a, b)=>{
+    const aPoints = calculatePointsFromTags(a.player.tags, a.fallbackTag);
+    const bPoints = calculatePointsFromTags(b.player.tags, b.fallbackTag);
+    if(bPoints !== aPoints){
+      return bPoints - aPoints;
+    }
+
+    return normalizeUsername(a.player.username).localeCompare(
+      normalizeUsername(b.player.username),
+      undefined,
+      { sensitivity:"base" }
+    );
+  });
+}
+
+function assignSharedRanks(items, getPoints){
+  let previousPoints = null;
+  let previousRank = null;
+
+  return [...items].map((item, index)=>{
+    const rawPoints = Number(getPoints(item));
+    const points = Number.isFinite(rawPoints) ? rawPoints : 0;
+    const rank = previousPoints !== null && points === previousPoints
+      ? previousRank
+      : index + 1;
+
+    previousPoints = points;
+    previousRank = rank;
+
+    return { item, points, rank };
+  });
+}
+
+function buildOverallItemMarkup(player, fallbackTag){
+  const username = normalizeUsername(player.username);
+  if(!username){
+    return "";
+  }
+
+  const regionMeta = getRegionMeta(player.region);
+  const tagKeys = normalizeTags(player.tags, fallbackTag || null);
+  if(!tagKeys.length){
+    return "";
+  }
+  const tagSources = normalizeTagSources(player.tagSources, tagKeys.length, player.tagSource || player.source || DEFAULT_TAG_SOURCE);
+  const tagSlots = tagKeys
+    .map((tag, index)=>({ tag, source:tagSources[index] || DEFAULT_TAG_SOURCE }))
+    .slice(0, OVERALL_TAG_SLOTS);
+  while(tagSlots.length < OVERALL_TAG_SLOTS){
+    tagSlots.push({ tag:"-", source:"" });
+  }
+  const tagsMarkup = tagSlots
+    .map(({ tag, source })=>buildTierTagMarkup(tag, source))
+    .join("");
+  const playerKey = username.toLowerCase();
+
+  return `
+    <div class="item" role="button" tabindex="0" data-player-key="${escapeText(playerKey)}" aria-label="View ${escapeText(username)} details">
+      <div class="player-meta">
+        <div class="name">${escapeText(username)}</div>
+        <div class="player-sub">Combat Rookie <span class="points">(0 points)</span></div>
+      </div>
+      <div class="region ${regionMeta.className}">${regionMeta.code}</div>
+      <div class="tier-tags">${tagsMarkup}</div>
+    </div>
+  `;
+}
+
+function normalizeDsmEntry(entry){
+  if(typeof entry === "string"){
+    const username = normalizeUsername(entry);
+    if(!username){
+      return null;
+    }
+    return { username, highTier:null, region:null };
+  }
+
+  if(entry && typeof entry === "object"){
+    const username = normalizeUsername(entry.username);
+    if(!username){
+      return null;
+    }
+    return {
+      username,
+      highTier: typeof entry.highTier === "boolean" ? entry.highTier : null,
+      region: entry.region ? normalizeRegion(entry.region) : null
+    };
+  }
+
+  return null;
+}
+
+function buildDsmRowsMarkup(entries, fallbackHighCount){
+  const normalized = (Array.isArray(entries) ? entries : [])
+    .map((entry)=>normalizeDsmEntry(entry))
+    .filter(Boolean);
+
+  return normalized.map((entry, index)=>{
+    const isHigh = entry.highTier === null ? index < fallbackHighCount : entry.highTier;
+    const playerKey = entry.username.toLowerCase();
+    const regionMeta = getRegionMeta(entry.region);
+    return `
+      <div class="dsm-row region-${escapeText(regionMeta.className)}" role="button" tabindex="0" data-player-key="${escapeText(playerKey)}" aria-label="View ${escapeText(entry.username)} details. Region: ${escapeText(regionMeta.label)}" title="Region: ${escapeText(regionMeta.label)}">
+        <span class="dsm-region-drawer ${regionMeta.className}" aria-hidden="true">${escapeText(regionMeta.code)}</span>
+        <div class="dsm-player" title="Region: ${escapeText(regionMeta.label)}">
+          <img class="dsm-avatar" src="https://mc-heads.net/avatar/${encodeURIComponent(entry.username)}/32" alt="${escapeText(entry.username)} avatar">
+          <span class="dsm-name">${escapeText(entry.username)}</span>
+        </div>
+        <span class="dsm-arrows ${isHigh ? "double" : "single"}" aria-label="${isHigh ? "High tier" : "Tier"}">
+          <span>&#8963;</span>
+          <span>&#8963;</span>
+        </span>
+      </div>
+    `;
+  }).join("");
+}
+
+function createBlankModeView(mode){
+  const wrapper = document.createElement("div");
+  wrapper.className = "view-pane dsm-view";
+  wrapper.id = mode.id;
+
+  wrapper.innerHTML = `
+    <section class="board">
+      <div class="board-head">
+        <div>
+          <p class="eyebrow">Combat Rankings</p>
+          <h1>${mode.label}</h1>
+        </div>
+        <button class="info-pill" type="button" data-open-info="true">Information</button>
+      </div>
+      <div class="tier-grid">
+        ${BLANK_RANKS.map((rankNo)=>`
+          <div class="tier">
+            <div class="tier-label"><span class="rank-no">${rankNo}</span></div>
+            <div class="tier-items"></div>
+          </div>
+        `).join("")}
+      </div>
+    </section>
+  `;
+
+  return wrapper;
+}
+
+function createDsmModeView(mode){
+  const wrapper = document.createElement("div");
+  wrapper.className = "view-pane dsm-view";
+  wrapper.id = mode.id;
+
+  wrapper.innerHTML = `
+    <section class="board dsm-board">
+      <div class="board-head">
+        <div>
+          <p class="eyebrow">Combat Rankings</p>
+          <h1>${mode.label}</h1>
+        </div>
+        <button class="info-pill" type="button" data-open-info="true">Information</button>
+      </div>
+      <div class="dsm-wrap">
+        <div class="dsm-grid">
+          ${DSM_TIERS.map((tier)=>`
+            <article class="dsm-col ${tier.css}">
+              <header class="dsm-head">
+                ${tier.cup ? `<span class="cup">&#127942;</span>` : ""}
+                <span>${tier.label}</span>
+              </header>
+              <div class="dsm-list" data-dsm-tier="${tier.key}">
+                ${buildDsmRowsMarkup(tier.players, tier.highCount)}
+              </div>
+            </article>
+          `).join("")}
+        </div>
+      </div>
+    </section>
+  `;
+
+  return wrapper;
+}
+
+function buildModeTabIcon(mode){
+  if(mode.iconSrc){
+    return `<img class="tab-ico tab-ico-image" src="${escapeText(mode.iconSrc)}" alt="" aria-hidden="true">`;
+  }
+
+  return `<span class="tab-ico">${escapeText(mode.code)}</span>`;
+}
+
+function initModeViews(){
+  if(!modeTabsHost){
+    return;
+  }
+
+  if(extraViewsHost){
+    MODE_VIEWS.filter((mode)=>mode.kind !== "existing").forEach((mode)=>{
+      if(mode.kind === "dsm"){
+        extraViewsHost.appendChild(createDsmModeView(mode));
+      } else {
+        extraViewsHost.appendChild(createBlankModeView(mode));
+      }
+    });
+  }
+
+  modeTabsHost.innerHTML = MODE_VIEWS.map((mode, index)=>`
+    <button
+      class="mode-tab ${index === 0 ? "active" : ""}"
+      type="button"
+      role="tab"
+      data-view-target="${mode.id}"
+      aria-selected="${index === 0 ? "true" : "false"}"
+    >
+      ${buildModeTabIcon(mode)}${mode.label}
+    </button>
+  `).join("");
+}
+
+function activateModeView(viewId){
+  const tabs = Array.from(document.querySelectorAll(".mode-tab[data-view-target]"));
+  const views = Array.from(document.querySelectorAll(".view-pane"));
+
+  tabs.forEach((tab)=>{
+    const isActive = tab.dataset.viewTarget === viewId;
+    tab.classList.toggle("active", isActive);
+    tab.setAttribute("aria-selected", isActive ? "true" : "false");
+  });
+
+  views.forEach((view)=>{
+    view.classList.toggle("active", view.id === viewId);
+  });
+
+  setActiveTopNav(viewId);
+}
+
+function setActiveTopNav(viewId){
+  const isHomeView = viewId === BRAND_RESET_VIEW_ID;
+
+  if(homeNavButton){
+    homeNavButton.classList.toggle("active", isHomeView);
+  }
+
+  if(discordNavButton){
+    discordNavButton.classList.toggle("active", !isHomeView);
+  }
+}
+
+function clearDiscordMenuCloseTimer(){
+  if(discordMenuCloseTimer === null){
+    return;
+  }
+
+  window.clearTimeout(discordMenuCloseTimer);
+  discordMenuCloseTimer = null;
+}
+
+function scheduleDiscordMenuClose(){
+  clearDiscordMenuCloseTimer();
+  discordMenuCloseTimer = window.setTimeout(()=>{
+    discordMenuCloseTimer = null;
+    closeDiscordMenu();
+  }, DISCORD_MENU_CLOSE_DELAY_MS);
+}
+
+function setDiscordMenuOpen(isOpen){
+  if(!discordNavDropdown || !discordNavButton){
+    return;
+  }
+
+  clearDiscordMenuCloseTimer();
+  discordNavDropdown.classList.toggle("open", isOpen);
+  discordNavButton.setAttribute("aria-expanded", isOpen ? "true" : "false");
+}
+
+function closeDiscordMenu(){
+  setDiscordMenuOpen(false);
+}
+
+function initTopNav(){
+  if(homeNavButton){
+    homeNavButton.addEventListener("click", ()=>{
+      closeDiscordMenu();
+      activateModeView(BRAND_RESET_VIEW_ID);
+      window.scrollTo({ top:0, behavior:"smooth" });
+    });
+  }
+
+  if(discordNavDropdown){
+    discordNavDropdown.addEventListener("focusin", ()=>{
+      setDiscordMenuOpen(true);
+    });
+
+    discordNavDropdown.addEventListener("focusout", ()=>{
+      window.setTimeout(()=>{
+        if(!discordNavDropdown.contains(document.activeElement)){
+          closeDiscordMenu();
+        }
+      }, 0);
+    });
+  }
+
+  if(discordNavButton){
+    discordNavButton.addEventListener("mouseenter", ()=>{
+      setDiscordMenuOpen(true);
+    });
+
+    discordNavButton.addEventListener("mouseleave", ()=>{
+      scheduleDiscordMenuClose();
+    });
+
+    discordNavButton.addEventListener("click", (event)=>{
+      event.preventDefault();
+      setDiscordMenuOpen(!discordNavDropdown.classList.contains("open"));
+    });
+
+    discordNavButton.addEventListener("keydown", (event)=>{
+      if(event.key === "ArrowDown"){
+        event.preventDefault();
+        setDiscordMenuOpen(true);
+        discordMenuLinks[0]?.focus();
+      }
+    });
+  }
+
+  if(discordMenuPanel){
+    discordMenuPanel.addEventListener("mouseenter", ()=>{
+      setDiscordMenuOpen(true);
+    });
+
+    discordMenuPanel.addEventListener("mouseleave", ()=>{
+      scheduleDiscordMenuClose();
+    });
+  }
+
+  discordMenuLinks.forEach((item)=>{
+    item.addEventListener("click", ()=>{
+      closeDiscordMenu();
+    });
+  });
+
+  document.addEventListener("click", (event)=>{
+    if(!discordNavDropdown){
+      return;
+    }
+
+    if(event.target instanceof Node && discordNavDropdown.contains(event.target)){
+      return;
+    }
+
+    closeDiscordMenu();
+  });
+
+  document.addEventListener("keydown", (event)=>{
+    if(event.key === "Escape"){
+      closeDiscordMenu();
+    }
+  });
+}
+
+function initModeTabs(){
+  const tabs = Array.from(document.querySelectorAll(".mode-tab[data-view-target]"));
+  if(!tabs.length){
+    return;
+  }
+
+  tabs.forEach((tab)=>{
+    tab.addEventListener("click", ()=>{
+      activateModeView(tab.dataset.viewTarget);
+    });
+  });
+
+  activateModeView(MODE_VIEWS[0].id);
+}
+
+function playBrandWipeAnimation(){
+  if(!brandWipe){
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve)=>{
+    const onAnimationEnd = ()=>{
+      brandWipe.classList.remove("play");
+      resolve();
+    };
+
+    brandWipe.classList.remove("play");
+    brandWipe.addEventListener("animationend", onAnimationEnd, { once:true });
+
+    window.requestAnimationFrame(()=>{
+      window.requestAnimationFrame(()=>{
+        brandWipe.classList.add("play");
+      });
+    });
+  });
+}
+
+function setBrandWipeOrigin(clientX, clientY){
+  if(!brandWipe || !brandHomeLink){
+    return;
+  }
+
+  const rect = brandHomeLink.getBoundingClientRect();
+  const usePointer =
+    typeof clientX === "number" &&
+    typeof clientY === "number" &&
+    (clientX > 0 || clientY > 0);
+  const wipeX = usePointer ? clientX : rect.left + (rect.width / 2);
+  const wipeY = usePointer ? clientY : rect.top + (rect.height / 2);
+  brandWipe.style.setProperty("--wipe-x", `${Math.round(wipeX)}px`);
+  brandWipe.style.setProperty("--wipe-y", `${Math.round(wipeY)}px`);
+}
+
+function playBrandWipeOnLoad(){
+  setBrandWipeOrigin();
+  window.requestAnimationFrame(()=>{
+    playBrandWipeAnimation();
+  });
+}
+
+function initBrandHomeReset(){
+  if(!brandHomeLink){
+    return;
+  }
+
+  let isResetAnimating = false;
+  brandHomeLink.addEventListener("click", (event)=>{
+    event.preventDefault();
+    if(isResetAnimating){
+      return;
+    }
+
+    setBrandWipeOrigin(event.clientX, event.clientY);
+
+    isResetAnimating = true;
+    playBrandWipeAnimation().finally(()=>{
+      isResetAnimating = false;
+    });
+
+    window.setTimeout(()=>{
+      activateModeView(BRAND_RESET_VIEW_ID);
+      window.scrollTo({ top:0, behavior:"smooth" });
+    }, BRAND_WIPE_SWITCH_MS);
+  });
+}
+
+function bindImageFallback(img, fallbackSrc, fallbackAlt){
+  if(!img || img.dataset.fallbackBound === "true"){
+    return;
+  }
+
+  img.dataset.fallbackBound = "true";
+  img.addEventListener("error", ()=>{
+    if(img.dataset.fallbackApplied === "true"){
+      return;
+    }
+    img.dataset.fallbackApplied = "true";
+    img.src = fallbackSrc;
+    if(fallbackAlt){
+      img.alt = fallbackAlt;
+    }
+  });
+}
+
+function initImageFallbacks(){
+  const rankSkins = Array.from(document.querySelectorAll(".rank-skin"));
+  rankSkins.forEach((img)=>{
+    bindImageFallback(img, DEFAULT_BUST_URL, `${DEFAULT_SKIN_NAME} skin`);
+  });
+
+  const dsmAvatars = Array.from(document.querySelectorAll(".dsm-avatar"));
+  dsmAvatars.forEach((img)=>{
+    bindImageFallback(img, DEFAULT_AVATAR_URL, `${DEFAULT_SKIN_NAME} avatar`);
+  });
+}
+
+function clearOverallPlayers(){
+  const zones = Array.from(document.querySelectorAll("#overall-view .tier-items"));
+  zones.forEach((zone)=>{
+    zone.innerHTML = "";
+  });
+}
+
+function syncTierSkin(row){
+  const skin = row.querySelector(".rank-skin");
+  if(!skin){
+    return;
+  }
+
+  bindImageFallback(skin, DEFAULT_BUST_URL, `${DEFAULT_SKIN_NAME} skin`);
+  const nameEl = row.querySelector(".name");
+  const username = (nameEl ? nameEl.textContent : "").trim() || DEFAULT_SKIN_NAME;
+
+  skin.dataset.fallbackApplied = "false";
+  skin.src = `https://render.crafty.gg/3d/bust/${encodeURIComponent(username)}`;
+  skin.alt = `${username} skin`;
+}
+
+function calculatePoints(row){
+  const tags = Array.from(row.querySelectorAll(".tier-tag"));
+  return tags.reduce((total, tag)=>{
+    const key = String(tag.dataset.tierKey || tag.textContent || "").trim().toUpperCase();
+    return total + (TIER_POINTS[key] || 0);
+  }, 0);
+}
+
+function sortAndStyleTierTagsContainer(tagsWrap){
+  if(!tagsWrap){
+    return;
+  }
+
+  const tags = Array.from(tagsWrap.querySelectorAll(".tier-tag"));
+  if(!tags.length){
+    return;
+  }
+
+  const keyOf = (tag)=>String(tag.dataset.tierKey || tag.textContent || "").trim().toUpperCase();
+  const sourceOf = (tag)=>String(tag.dataset.tierSource || "").trim().toLowerCase();
+  const sortedTags = [...tags].sort((a, b)=>{
+    const aKey = keyOf(a);
+    const bKey = keyOf(b);
+    if(aKey === "-" && bKey !== "-"){
+      return 1;
+    }
+    if(bKey === "-" && aKey !== "-"){
+      return -1;
+    }
+    const aPoints = TIER_POINTS[aKey] || 0;
+    const bPoints = TIER_POINTS[bKey] || 0;
+
+    if(bPoints !== aPoints){
+      return bPoints - aPoints;
+    }
+    return aKey.localeCompare(bKey);
+  });
+
+  const currentOrder = tags.map((tag)=>keyOf(tag)).join("|");
+  const sortedOrder = sortedTags.map((tag)=>keyOf(tag)).join("|");
+  if(currentOrder !== sortedOrder){
+    tagsWrap.replaceChildren(...sortedTags);
+  }
+
+  Array.from(tagsWrap.querySelectorAll(".tier-tag")).forEach((tag)=>{
+    const key = keyOf(tag);
+    const source = sourceOf(tag) || DEFAULT_TAG_SOURCE;
+    tag.dataset.tierKey = key;
+    if(key === "-"){
+      tag.className = "tier-tag empty";
+      tag.textContent = "-";
+      delete tag.dataset.tierSource;
+      return;
+    }
+
+    tag.dataset.tierSource = source;
+
+    const tierNumMatch = key.match(/[1-5]$/);
+    if(!tierNumMatch){
+      tag.className = "tier-tag";
+      if(source === "dsm"){
+        tag.classList.add("source-dsm");
+      }
+      tag.textContent = key;
+      return;
+    }
+
+    const tierNum = key.slice(-1);
+    const isLower = key.startsWith("LT");
+    tag.className = `tier-tag t${tierNum} ${isLower ? "lt" : "ht"}`;
+    if(source === "dsm"){
+      tag.classList.add("source-dsm");
+    }
+    tag.textContent = formatTierTagLabel(key);
+  });
+}
+
+function sortAndStyleTierTags(row){
+  const tagsWrap = row.querySelector(".tier-tags");
+  sortAndStyleTierTagsContainer(tagsWrap);
+}
+
+function getTitleByPoints(points){
+  return TITLE_RULES.find((rule)=>points >= rule.min) || TITLE_RULES[TITLE_RULES.length - 1];
+}
+
+function syncPlayerStats(row){
+  const sub = row.querySelector(".player-sub");
+  if(!sub){
+    return;
+  }
+
+  const points = calculatePoints(row);
+  const title = getTitleByPoints(points);
+  const pointWord = points === 1 ? "point" : "points";
+  sub.innerHTML = `<span class="title-label ${title.className}">${title.name}</span> <span class="points">(${points} ${pointWord})</span>`;
+}
+
+function syncRow(row){
+  syncTierSkin(row);
+  sortAndStyleTierTags(row);
+  syncPlayerStats(row);
+}
+
+function applyTierSync(){
+  const tierRows = Array.from(document.querySelectorAll("#overall-view .tier"));
+  tierRows.forEach((row)=>syncRow(row));
+}
+
+function renderOverallFromData(overallData){
+  const sortedEntries = sortOverallEntriesByPoints(collectOverallEntriesFromPayload(overallData));
+  const rankedEntries = assignSharedRanks(
+    sortedEntries,
+    (entry)=>calculatePointsFromTags(entry.player.tags, entry.fallbackTag)
+  );
+
+  OVERALL_RANK_IDS.forEach((displayRankId, index)=>{
+    const zone = document.getElementById(displayRankId);
+    if(!zone){
+      return;
+    }
+
+    const rankLabel = zone.closest(".tier")?.querySelector(".rank-no");
+    const rankedEntry = rankedEntries[index] || null;
+    if(rankLabel){
+      rankLabel.textContent = rankedEntry ? `${rankedEntry.rank}.` : BLANK_RANKS[index];
+    }
+
+    zone.innerHTML = rankedEntry ? buildOverallItemMarkup(rankedEntry.item.player, rankedEntry.item.fallbackTag) : "";
+  });
+
+  initImageFallbacks();
+  applyTierSync();
+  refreshOpenPlayerModal();
+}
+
+function renderDsmFromData(dsmData){
+  DSM_TIERS.forEach((tier)=>{
+    const list = document.querySelector(`#diamond-spear-mace-view .dsm-list[data-dsm-tier="${tier.key}"]`);
+    if(!list){
+      return;
+    }
+
+    const entries = dsmData && Array.isArray(dsmData[tier.key]) ? dsmData[tier.key] : tier.players;
+    list.innerHTML = buildDsmRowsMarkup(entries, tier.highCount);
+  });
+
+  initImageFallbacks();
+}
+
+function activateInfoTab(tabName){
+  infoTabs.forEach((tab)=>{
+    const isActive = tab.dataset.infoTab === tabName;
+    tab.classList.toggle("active", isActive);
+    tab.setAttribute("aria-selected", isActive ? "true" : "false");
+  });
+
+  infoPanels.forEach((panel)=>{
+    panel.classList.toggle("active", panel.dataset.infoPanel === tabName);
+  });
+}
+
+function formatRegionLabel(region){
+  return getRegionMeta(region).label;
+}
+
+function assignOverallRanks(profiles){
+  const sortedProfiles = [...profiles]
+    .sort((a, b)=>{
+      if((b.points || 0) !== (a.points || 0)){
+        return (b.points || 0) - (a.points || 0);
+      }
+
+      return normalizeUsername(a.username).localeCompare(normalizeUsername(b.username), undefined, {
+        sensitivity:"base"
+      });
+    });
+
+  return assignSharedRanks(sortedProfiles, (profile)=>profile.points)
+    .map(({ item, rank })=>({
+      ...item,
+      overallRank:rank
+    }));
+}
+
+function sortPlayerProfiles(profiles){
+  return [...profiles].sort((a, b)=>{
+    const aRank = Number.isInteger(a.overallRank) ? a.overallRank : Number.POSITIVE_INFINITY;
+    const bRank = Number.isInteger(b.overallRank) ? b.overallRank : Number.POSITIVE_INFINITY;
+    if(aRank !== bRank){
+      return aRank - bRank;
+    }
+
+    if((b.points || 0) !== (a.points || 0)){
+      return (b.points || 0) - (a.points || 0);
+    }
+
+    return normalizeUsername(a.username).localeCompare(normalizeUsername(b.username), undefined, {
+      sensitivity:"base"
+    });
+  });
+}
+
+function buildProfileFromRow(row){
+  if(!(row instanceof Element)){
+    return null;
+  }
+
+  const username = normalizeUsername(row.querySelector(".name")?.textContent);
+  if(!username){
+    return null;
+  }
+
+  const rankText = String(row.closest(".tier")?.querySelector(".rank-no")?.textContent || "").trim();
+  const rankMatch = rankText.match(/^(\d+)\.$/);
+  const points = calculatePoints(row);
+  const tags = Array.from(row.querySelectorAll(".tier-tag"))
+    .map((tag)=>normalizeTierTag(tag.dataset.tierKey || tag.textContent))
+    .filter(Boolean);
+  const tagSources = Array.from(row.querySelectorAll(".tier-tag"))
+    .map((tag)=>String(tag.dataset.tierSource || DEFAULT_TAG_SOURCE).trim().toLowerCase() || DEFAULT_TAG_SOURCE)
+    .slice(0, tags.length);
+
+  return {
+    key:username.toLowerCase(),
+    username,
+    region:normalizeRegion(row.querySelector(".region")?.textContent),
+    overallRank:rankMatch ? Number.parseInt(rankMatch[1], 10) : null,
+    points,
+    title:getTitleByPoints(points),
+    tags,
+    tagSources
+  };
+}
+
+function buildSearchProfilesFromDom(){
+  const byKey = new Map();
+  const rows = Array.from(document.querySelectorAll("#overall-view .item[data-player-key]"));
+  rows.forEach((row)=>{
+    const profile = buildProfileFromRow(row);
+    if(profile){
+      byKey.set(profile.key, profile);
+    }
+  });
+  return sortPlayerProfiles(assignOverallRanks(Array.from(byKey.values())));
+}
+
+function buildSearchProfilesFromPayload(overallData, dsmData){
+  const profiles = new Map();
+  const overallEntries = sortOverallEntriesByPoints(collectOverallEntriesFromPayload(overallData));
+
+  overallEntries.forEach((entry, index)=>{
+    const username = normalizeUsername(entry.player.username);
+    if(!username){
+      return;
+    }
+
+    const tags = normalizeTags(entry.player.tags, entry.fallbackTag);
+    if(!tags.length){
+      return;
+    }
+
+    const points = calculatePointsFromTags(tags, entry.fallbackTag);
+    profiles.set(username.toLowerCase(), {
+      key:username.toLowerCase(),
+      username,
+      region:normalizeRegion(entry.player.region),
+      overallRank:null,
+      points,
+      title:getTitleByPoints(points),
+      tags:[...tags],
+      tagSources:normalizeTagSources(
+        entry.player.tagSources,
+        tags.length,
+        entry.player.tagSource || entry.player.source || DEFAULT_TAG_SOURCE
+      )
+    });
+  });
+
+  DSM_TIERS.forEach((tier)=>{
+    const entries = dsmData && Array.isArray(dsmData[tier.key]) ? dsmData[tier.key] : tier.players;
+    const normalizedEntries = entries
+      .map((entry)=>normalizeDsmEntry(entry))
+      .filter(Boolean);
+
+    normalizedEntries.forEach((entry, index)=>{
+      const key = entry.username.toLowerCase();
+      const existing = profiles.get(key);
+      if(existing && existing.tags.length){
+        return;
+      }
+
+      const isHigh = entry.highTier === null ? index < tier.highCount : entry.highTier;
+      const mappedTag = mapDsmToOverallTag(tier.key, isHigh);
+      if(!mappedTag){
+        return;
+      }
+
+      const nextTags = existing ? [...existing.tags, mappedTag] : [mappedTag];
+      const nextTagSources = existing ? [...existing.tagSources, "dsm"] : ["dsm"];
+      const points = calculatePointsFromTags(nextTags);
+
+      profiles.set(key, {
+        key,
+        username:normalizeUsername(entry.username),
+        region:existing ? existing.region : normalizeRegion(entry.region),
+        overallRank:existing ? existing.overallRank : null,
+        points,
+        title:getTitleByPoints(points),
+        tags:nextTags,
+        tagSources:nextTagSources
+      });
+    });
+  });
+
+  return sortPlayerProfiles(assignOverallRanks(Array.from(profiles.values())));
+}
+
+function setSearchablePlayerProfiles(profiles){
+  searchablePlayerProfiles = sortPlayerProfiles(
+    Array.isArray(profiles)
+      ? profiles.filter((profile)=>profile && normalizeUsername(profile.username))
+      : []
+  );
+
+  if(playerSearchResults?.classList.contains("open")){
+    renderPlayerSearchResults();
+  }
+}
+
+function getSearchProfileByKey(playerKey){
+  const key = String(playerKey || "").trim().toLowerCase();
+  return searchablePlayerProfiles.find((profile)=>profile.key === key) || null;
+}
+
+function getSearchMatches(query){
+  const needle = normalizeUsername(query).toLowerCase();
+  if(!needle){
+    return [];
+  }
+
+  return [...searchablePlayerProfiles]
+    .filter((profile)=>profile.key.includes(needle))
+    .sort((a, b)=>{
+      const aExact = a.key === needle ? 1 : 0;
+      const bExact = b.key === needle ? 1 : 0;
+      if(bExact !== aExact){
+        return bExact - aExact;
+      }
+
+      const aStarts = a.key.startsWith(needle) ? 1 : 0;
+      const bStarts = b.key.startsWith(needle) ? 1 : 0;
+      if(bStarts !== aStarts){
+        return bStarts - aStarts;
+      }
+
+      const aRank = Number.isInteger(a.overallRank) ? a.overallRank : Number.POSITIVE_INFINITY;
+      const bRank = Number.isInteger(b.overallRank) ? b.overallRank : Number.POSITIVE_INFINITY;
+      if(aRank !== bRank){
+        return aRank - bRank;
+      }
+
+      if((b.points || 0) !== (a.points || 0)){
+        return (b.points || 0) - (a.points || 0);
+      }
+
+      return a.username.localeCompare(b.username, undefined, { sensitivity:"base" });
+    });
+}
+
+function closePlayerSearchResults(){
+  if(!playerSearchResults){
+    return;
+  }
+
+  playerSearchResults.classList.remove("open");
+  playerSearchResults.innerHTML = "";
+}
+
+function buildSearchResultMarkup(profile){
+  const safeProfile = profile && typeof profile === "object" ? profile : null;
+  if(!safeProfile){
+    return "";
+  }
+
+  const rankLabel = Number.isInteger(safeProfile.overallRank) ? `#${safeProfile.overallRank}` : "Unranked";
+  const pointWord = safeProfile.points === 1 ? "point" : "points";
+  return `
+    <button class="search-result" type="button" data-player-key="${escapeText(safeProfile.key)}" aria-label="Open ${escapeText(safeProfile.username)} details">
+      <img class="search-result-avatar" src="https://mc-heads.net/avatar/${encodeURIComponent(safeProfile.username)}/32" alt="${escapeText(safeProfile.username)} avatar">
+      <span>
+        <span class="search-result-name">${escapeText(safeProfile.username)}</span>
+        <span class="search-result-meta">${escapeText(safeProfile.title.name)} (${escapeText(String(safeProfile.points))} ${pointWord})</span>
+      </span>
+      <span class="search-result-rank">${escapeText(rankLabel)}</span>
+    </button>
+  `;
+}
+
+function renderPlayerSearchResults(){
+  if(!playerSearchInput || !playerSearchResults){
+    return;
+  }
+
+  const query = playerSearchInput.value.trim();
+  if(!query){
+    closePlayerSearchResults();
+    return;
+  }
+
+  const matches = getSearchMatches(query).slice(0, 8);
+  if(!matches.length){
+    playerSearchResults.innerHTML = `<div class="search-empty">No players found.</div>`;
+    playerSearchResults.classList.add("open");
+    return;
+  }
+
+  playerSearchResults.innerHTML = matches.map((profile)=>buildSearchResultMarkup(profile)).join("");
+  playerSearchResults.classList.add("open");
+
+  Array.from(playerSearchResults.querySelectorAll(".search-result-avatar")).forEach((img)=>{
+    bindImageFallback(img, DEFAULT_AVATAR_URL, `${DEFAULT_SKIN_NAME} avatar`);
+  });
+}
+
+function resolvePlayerModalSourceRow(trigger){
+  if(!(trigger instanceof Element)){
+    return null;
+  }
+
+  if(trigger.matches("#overall-view .item[data-player-key]")){
+    return trigger;
+  }
+
+  const playerKey = String(trigger.dataset.playerKey || "").trim().toLowerCase();
+  if(!playerKey){
+    return null;
+  }
+
+  return document.querySelector(`#overall-view .item[data-player-key="${playerKey}"]`);
+}
+
+function closePlayerModal(){
+  if(!playerModal){
+    return;
+  }
+
+  playerModal.classList.remove("open");
+  playerModal.setAttribute("aria-hidden", "true");
+  activePlayerKey = "";
+
+  if(lastPlayerTrigger && document.contains(lastPlayerTrigger)){
+    lastPlayerTrigger.focus();
+  }
+  lastPlayerTrigger = null;
+}
+
+function populatePlayerModal(profile){
+  if(!playerModal || !profile || typeof profile !== "object"){
+    return;
+  }
+
+  const username = normalizeUsername(profile.username);
+  if(!username){
+    return;
+  }
+
+  const regionCode = normalizeRegion(profile.region);
+  const rankText = Number.isInteger(profile.overallRank) ? `${profile.overallRank}.` : "--";
+  const points = Number.isFinite(profile.points)
+    ? profile.points
+    : calculatePointsFromTags(profile.tags, null);
+  const pointWord = points === 1 ? "point" : "points";
+  const title = profile.title && profile.title.name ? profile.title : getTitleByPoints(points);
+  const normalizedTags = normalizeTags(profile.tags, null);
+  const normalizedTagSources = normalizeTagSources(profile.tagSources, normalizedTags.length, DEFAULT_TAG_SOURCE);
+  const tags = normalizedTags
+    .map((key, index)=>({
+      key,
+      source:normalizedTagSources[index] || DEFAULT_TAG_SOURCE
+    }))
+    .filter((tag)=>Boolean(tag.key));
+
+  playerModalName.textContent = username;
+  playerModalTitle.className = `player-title-pill ${title.className}`;
+  playerModalTitle.textContent = title.name;
+  playerModalRegion.textContent = formatRegionLabel(regionCode);
+  playerModalLink.href = `https://namemc.com/profile/${encodeURIComponent(username)}`;
+  playerModalRank.textContent = rankText;
+  playerModalPoints.textContent = `(${points} ${pointWord})`;
+
+  bindImageFallback(playerModalAvatar, DEFAULT_BUST_URL, `${DEFAULT_SKIN_NAME} skin`);
+  playerModalAvatar.dataset.fallbackApplied = "false";
+  playerModalAvatar.src = `https://render.crafty.gg/3d/bust/${encodeURIComponent(username)}`;
+  playerModalAvatar.alt = `${username} skin`;
+
+  if(tags.length){
+    playerModalTiers.innerHTML = tags.map((tag)=>buildTierTagMarkup(tag.key, tag.source)).join("");
+    sortAndStyleTierTagsContainer(playerModalTiers);
+  } else {
+    playerModalTiers.innerHTML = `<span class="player-tier-empty">No tier data available.</span>`;
+  }
+}
+
+function populatePlayerModalFromRow(row){
+  const profile = buildProfileFromRow(row);
+  if(!profile){
+    return;
+  }
+
+  populatePlayerModal(profile);
+}
+
+function openPlayerModalFromProfile(profile, trigger = null){
+  if(!playerModal || !profile){
+    return;
+  }
+
+  lastPlayerTrigger = trigger || lastPlayerTrigger;
+  activePlayerKey = String(profile.key || "").trim().toLowerCase();
+  populatePlayerModal(profile);
+  playerModal.classList.add("open");
+  playerModal.setAttribute("aria-hidden", "false");
+  closePlayerSearchResults();
+}
+
+function openPlayerModalFromRow(row, trigger = row){
+  const profile = buildProfileFromRow(row);
+  if(!profile){
+    return;
+  }
+
+  lastPlayerTrigger = trigger;
+  activePlayerKey = String(profile.key || "").trim().toLowerCase();
+  populatePlayerModal(profile);
+  playerModal.classList.add("open");
+  playerModal.setAttribute("aria-hidden", "false");
+  closePlayerSearchResults();
+}
+
+function refreshOpenPlayerModal(){
+  if(!playerModal || !playerModal.classList.contains("open") || !activePlayerKey){
+    return;
+  }
+
+  const row = document.querySelector(`#overall-view .item[data-player-key="${activePlayerKey}"]`);
+  if(!row){
+    const profile = getSearchProfileByKey(activePlayerKey);
+    if(profile){
+      populatePlayerModal(profile);
+    }
+    return;
+  }
+
+  populatePlayerModalFromRow(row);
+}
+
+function initPlayerSearch(){
+  if(!playerSearch || !playerSearchInput || !playerSearchResults){
+    return;
+  }
+
+  playerSearchInput.addEventListener("input", ()=>{
+    renderPlayerSearchResults();
+  });
+
+  playerSearchInput.addEventListener("focus", ()=>{
+    if(playerSearchInput.value.trim()){
+      renderPlayerSearchResults();
+    }
+  });
+
+  playerSearchInput.addEventListener("keydown", (event)=>{
+    if(event.key === "Enter"){
+      const firstMatch = getSearchMatches(playerSearchInput.value)[0];
+      if(firstMatch){
+        event.preventDefault();
+        playerSearchInput.value = firstMatch.username;
+        openPlayerModalFromProfile(firstMatch, playerSearchInput);
+      }
+      return;
+    }
+
+    if(event.key === "Escape"){
+      closePlayerSearchResults();
+    }
+  });
+
+  playerSearchResults.addEventListener("click", (event)=>{
+    const trigger = event.target instanceof Element
+      ? event.target.closest(".search-result[data-player-key]")
+      : null;
+
+    if(!trigger){
+      return;
+    }
+
+    const profile = getSearchProfileByKey(trigger.dataset.playerKey);
+    if(!profile){
+      return;
+    }
+
+    playerSearchInput.value = profile.username;
+    openPlayerModalFromProfile(profile, trigger);
+  });
+
+  document.addEventListener("click", (event)=>{
+    if(event.target instanceof Node && playerSearch.contains(event.target)){
+      return;
+    }
+    closePlayerSearchResults();
+  });
+}
+
+function initPlayerModal(){
+  if(!playerModal){
+    return;
+  }
+
+  document.addEventListener("click", (event)=>{
+    const trigger = event.target instanceof Element
+      ? event.target.closest("#overall-view .item[data-player-key], .dsm-row[data-player-key]")
+      : null;
+
+    if(trigger){
+      const sourceRow = resolvePlayerModalSourceRow(trigger);
+      if(sourceRow){
+        openPlayerModalFromRow(sourceRow, trigger);
+        return;
+      }
+
+      const profile = getSearchProfileByKey(trigger.dataset.playerKey);
+      if(profile){
+        openPlayerModalFromProfile(profile, trigger);
+      }
+      return;
+    }
+
+    if(event.target === playerModal){
+      closePlayerModal();
+    }
+  });
+
+  if(playerModalCloseButton){
+    playerModalCloseButton.addEventListener("click", ()=>{
+      closePlayerModal();
+    });
+  }
+
+  document.addEventListener("keydown", (event)=>{
+    const trigger = event.target instanceof Element
+      ? event.target.closest("#overall-view .item[data-player-key], .dsm-row[data-player-key]")
+      : null;
+
+    if(trigger && (event.key === "Enter" || event.key === " ")){
+      event.preventDefault();
+      const sourceRow = resolvePlayerModalSourceRow(trigger);
+      if(sourceRow){
+        openPlayerModalFromRow(sourceRow, trigger);
+        return;
+      }
+
+      const profile = getSearchProfileByKey(trigger.dataset.playerKey);
+      if(profile){
+        openPlayerModalFromProfile(profile, trigger);
+      }
+      return;
+    }
+
+    if(event.key === "Escape"){
+      closePlayerModal();
+    }
+  });
+}
+
+function positionInfoModal(button){
+  if(!infoModal || !infoCard || !button){
+    return;
+  }
+
+  const rect = button.getBoundingClientRect();
+  const width = Math.min(INFO_MODAL_MAX_WIDTH, window.innerWidth - (INFO_MODAL_GUTTER * 2));
+  const availableBelow = window.innerHeight - rect.bottom - INFO_MODAL_OFFSET - INFO_MODAL_GUTTER;
+  const availableAbove = rect.top - INFO_MODAL_OFFSET - INFO_MODAL_GUTTER;
+  const shouldPlaceBelow = availableBelow >= INFO_MODAL_MIN_HEIGHT || availableBelow >= availableAbove;
+  const maxHeight = Math.min(
+    INFO_MODAL_MAX_HEIGHT,
+    Math.max(shouldPlaceBelow ? availableBelow : availableAbove, INFO_MODAL_MIN_HEIGHT)
+  );
+
+  infoModal.style.setProperty("--info-width", `${Math.round(width)}px`);
+  infoModal.style.setProperty("--info-max-height", `${Math.round(maxHeight)}px`);
+
+  let left = rect.right - width;
+  left = Math.min(left, window.innerWidth - INFO_MODAL_GUTTER - width);
+  left = Math.max(INFO_MODAL_GUTTER, left);
+
+  let top;
+  if(shouldPlaceBelow){
+    top = rect.bottom + INFO_MODAL_OFFSET;
+  } else {
+    top = rect.top - maxHeight - INFO_MODAL_OFFSET;
+  }
+
+  top = Math.max(INFO_MODAL_GUTTER, top);
+
+  infoModal.style.setProperty("--info-left", `${Math.round(left)}px`);
+  infoModal.style.setProperty("--info-top", `${Math.round(top)}px`);
+}
+
+function openInfoModal(button){
+  infoAnchorButton = button || infoAnchorButton;
+  activateInfoTab("titles");
+  infoModal.classList.add("open");
+  infoModal.setAttribute("aria-hidden", "false");
+  infoCard.scrollTop = 0;
+  positionInfoModal(infoAnchorButton);
+  if(infoCard){
+    infoCard.focus({ preventScroll:true });
+  }
+}
+
+function closeInfoModal(){
+  infoModal.classList.remove("open");
+  infoModal.setAttribute("aria-hidden", "true");
+}
+
+function initInfoModal(){
+  if(!infoModal){
+    return;
+  }
+
+  const infoButtons = Array.from(document.querySelectorAll("[data-open-info='true']"));
+  infoButtons.forEach((button)=>{
+    button.addEventListener("click", ()=>{
+      if(infoModal.classList.contains("open") && infoAnchorButton === button){
+        closeInfoModal();
+        return;
+      }
+
+      openInfoModal(button);
+    });
+  });
+
+  infoModal.addEventListener("click", (event)=>{
+    if(event.target === infoModal){
+      closeInfoModal();
+    }
+  });
+
+  document.addEventListener("keydown", (event)=>{
+    if(event.key === "Escape"){
+      closeInfoModal();
+    }
+  });
+
+  window.addEventListener("resize", ()=>{
+    if(infoModal.classList.contains("open") && infoAnchorButton){
+      positionInfoModal(infoAnchorButton);
+    }
+  });
+
+  window.addEventListener("scroll", ()=>{
+    if(infoModal.classList.contains("open") && infoAnchorButton){
+      positionInfoModal(infoAnchorButton);
+    }
+  }, true);
+
+  infoTabs.forEach((tab)=>{
+    tab.addEventListener("click", ()=>{
+      activateInfoTab(tab.dataset.infoTab);
+      if(infoModal.classList.contains("open") && infoAnchorButton){
+        positionInfoModal(infoAnchorButton);
+      }
+    });
+  });
+}
+
+async function fetchAndRenderTiers(){
+  if(shouldSkipNetworkTierFetch()){
+    return;
+  }
+
+  try{
+    const response = await fetch(API_TIERS_URL, { cache:"no-store" });
+    if(!response.ok){
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const payload = await response.json();
+    renderOverallFromData(payload.overall || {});
+    renderDsmFromData(payload.dsm || {});
+    setSearchablePlayerProfiles(buildSearchProfilesFromPayload(payload.overall || {}, payload.dsm || {}));
+    refreshOpenPlayerModal();
+  } catch (error){
+    console.error("Could not refresh tiers from API:", error);
+  }
+}
+
+function startTierPolling(){
+  if(shouldSkipNetworkTierFetch()){
+    return;
+  }
+
+  fetchAndRenderTiers();
+  window.setInterval(fetchAndRenderTiers, API_POLL_MS);
+}
+
+initModeViews();
+initModeTabs();
+initTopNav();
+initBrandHomeReset();
+initInfoModal();
+initPlayerModal();
+initPlayerSearch();
+if(CLEAR_ALL_PLAYERS){
+  clearOverallPlayers();
+  renderDsmFromData({});
+}
+applyTierSync();
+initImageFallbacks();
+setSearchablePlayerProfiles(buildSearchProfilesFromDom());
+playBrandWipeOnLoad();
+startTierPolling();
+</script>
+
+</body>
+</html>
