@@ -57,7 +57,7 @@ app.use("/api", (req, res, next) => {
   }
   return next();
 });
-app.use("/api", express.json({ limit: "256kb" }));
+app.use(express.json({ limit: "256kb" }));
 app.use(express.static(__dirname));
 
 function parseEnvList(value, fallback = []) {
@@ -1252,18 +1252,18 @@ function requireSecret(req, res, next) {
   return next();
 }
 
-app.get("/api/tiers", async (_req, res) => {
+async function handleTiersRead(_req, res) {
   try {
     const state = await readState();
     res.set("Cache-Control", "no-store");
-    res.json(state);
+    return res.json(state);
   } catch (error) {
     console.error("GET /api/tiers failed:", error);
-    res.status(500).json({ error: "Failed to read tier data" });
+    return res.status(500).json({ error: "Failed to read tier data" });
   }
-});
+}
 
-app.post("/api/tiers", requireSecret, async (req, res) => {
+async function handleWebhookRoute(req, res, routeLabel) {
   try {
     const state = await readState();
     const result = applyWebhookPayload(state, req.body);
@@ -1277,47 +1277,24 @@ app.post("/api/tiers", requireSecret, async (req, res) => {
       updatedAt: state.updatedAt
     });
   } catch (error) {
-    console.error("POST /api/tiers failed:", error);
+    console.error(`POST ${routeLabel} failed:`, error);
     return res.status(500).json({ error: "Failed to sync tiers" });
   }
-});
+}
 
-app.post("/api/webhook", requireSecret, async (req, res) => {
-  try {
-    const state = await readState();
-    const result = applyWebhookPayload(state, req.body);
-    if (!result.ok) {
-      return res.status(result.status || 400).json(result);
-    }
+app.get("/api/tiers", handleTiersRead);
+app.get("/tiers", handleTiersRead);
 
-    await writeState(state);
-    return res.json({
-      ...result,
-      updatedAt: state.updatedAt
-    });
-  } catch (error) {
-    console.error("POST /api/webhook failed:", error);
-    return res.status(500).json({ error: "Failed to sync tiers" });
-  }
-});
-
-app.post("/api/sync", requireSecret, async (req, res) => {
-  try {
-    const state = await readState();
-    const result = applyWebhookPayload(state, req.body);
-    if (!result.ok) {
-      return res.status(result.status || 400).json(result);
-    }
-
-    await writeState(state);
-    return res.json({
-      ...result,
-      updatedAt: state.updatedAt
-    });
-  } catch (error) {
-    console.error("POST /api/sync failed:", error);
-    return res.status(500).json({ error: "Failed to sync tiers" });
-  }
+[
+  "/api/tiers",
+  "/api/webhook",
+  "/api/sync",
+  "/tiers",
+  "/webhook",
+  "/sync",
+  "/"
+].forEach((routePath) => {
+  app.post(routePath, requireSecret, async (req, res) => handleWebhookRoute(req, res, routePath));
 });
 
 app.post("/api/update-tier", requireSecret, async (req, res) => {
