@@ -2600,16 +2600,22 @@ h1{
 // Add future ranking pages here:
 // kind:"existing" uses a hardcoded HTML view, kind:"blank" auto-generates an empty board,
 // kind:"dsm" generates the 5-column Diamond Spear Mace layout from DSM_TIERS.
-const MODE_VIEWS = [
-  { id:"overall-view", code:"OV", label:"Overall", kind:"existing" },
-  {
-    id:"diamond-spear-mace-view",
-    code:"DSM",
-    label:"Diamond Spear Mace",
-    kind:"dsm",
-    iconSrc:"./assets/dsm.png"
-  }
-];
+ const MODE_VIEWS = [
+   { id:"overall-view", code:"OV", label:"Overall", kind:"existing" },
+   {
+     id:"diamond-spear-mace-view",
+     code:"DSM",
+     label:"Diamond Spear Mace",
+     kind:"dsm",
+     iconSrc:"./assets/dsm.png"
+   },
+   {
+     id:"pp57-view",
+     code:"PP57",
+     label:"PP57",
+     kind:"dsm"
+   }
+ ];
 
 const OVERALL_RANK_IDS = ["rank1","rank2","rank3","rank4","rank5","rank6","rank7","rank8","rank9","rank10"];
 const LEGACY_OVERALL_IDS = ["ht1","lt1","ht2","lt2","ht3","lt3","ht4","lt4","ht5","lt5"];
@@ -3564,18 +3570,26 @@ function renderOverallFromData(overallData){
   refreshOpenPlayerModal();
 }
 
-function renderDsmFromData(dsmData){
+function renderDsmTierBoardFromData(viewId, boardData){
   DSM_TIERS.forEach((tier)=>{
-    const list = document.querySelector(`#diamond-spear-mace-view .dsm-list[data-dsm-tier="${tier.key}"]`);
+    const list = document.querySelector(`#${viewId} .dsm-list[data-dsm-tier="${tier.key}"]`);
     if(!list){
       return;
     }
 
-    const entries = dsmData && Array.isArray(dsmData[tier.key]) ? dsmData[tier.key] : tier.players;
+    const entries = boardData && Array.isArray(boardData[tier.key]) ? boardData[tier.key] : tier.players;
     list.innerHTML = buildDsmRowsMarkup(entries, tier.highCount);
   });
 
   initImageFallbacks();
+}
+
+function renderDsmFromData(dsmData){
+  renderDsmTierBoardFromData("diamond-spear-mace-view", dsmData);
+}
+
+function renderPp57FromData(pp57Data){
+  renderDsmTierBoardFromData("pp57-view", pp57Data);
 }
 
 function activateInfoTab(tabName){
@@ -3675,7 +3689,7 @@ function buildSearchProfilesFromDom(){
   return sortPlayerProfiles(assignOverallRanks(Array.from(byKey.values())));
 }
 
-function buildSearchProfilesFromPayload(overallData, dsmData){
+function buildSearchProfilesFromPayload(overallData, dsmData, pp57Data){
   const profiles = new Map();
   const overallEntries = sortOverallEntriesByPoints(collectOverallEntriesFromPayload(overallData));
 
@@ -3703,45 +3717,51 @@ function buildSearchProfilesFromPayload(overallData, dsmData){
         entry.player.tagSources,
         tags.length,
         entry.player.tagSource || entry.player.source || DEFAULT_TAG_SOURCE
-      )
+      ),
+      _fromOverall:true
     });
   });
 
-  DSM_TIERS.forEach((tier)=>{
-    const entries = dsmData && Array.isArray(dsmData[tier.key]) ? dsmData[tier.key] : tier.players;
-    const normalizedEntries = entries
-      .map((entry)=>normalizeDsmEntry(entry))
-      .filter(Boolean);
+  const mergeTierBoard = (boardData, source)=>{
+    DSM_TIERS.forEach((tier)=>{
+      const entries = boardData && Array.isArray(boardData[tier.key]) ? boardData[tier.key] : tier.players;
+      const normalizedEntries = entries
+        .map((entry)=>normalizeDsmEntry(entry))
+        .filter(Boolean);
 
-    normalizedEntries.forEach((entry, index)=>{
-      const key = entry.username.toLowerCase();
-      const existing = profiles.get(key);
-      if(existing && existing.tags.length){
-        return;
-      }
+      normalizedEntries.forEach((entry, index)=>{
+        const key = entry.username.toLowerCase();
+        const existing = profiles.get(key);
+        if(existing && existing._fromOverall){
+          return;
+        }
 
-      const isHigh = entry.highTier === null ? index < tier.highCount : entry.highTier;
-      const mappedTag = mapDsmToOverallTag(tier.key, isHigh);
-      if(!mappedTag){
-        return;
-      }
+        const isHigh = entry.highTier === null ? index < tier.highCount : entry.highTier;
+        const mappedTag = mapDsmToOverallTag(tier.key, isHigh);
+        if(!mappedTag){
+          return;
+        }
 
-      const nextTags = existing ? [...existing.tags, mappedTag] : [mappedTag];
-      const nextTagSources = existing ? [...existing.tagSources, "dsm"] : ["dsm"];
-      const points = calculatePointsFromTags(nextTags);
+        const nextTags = existing ? [...existing.tags, mappedTag] : [mappedTag];
+        const nextTagSources = existing ? [...existing.tagSources, source] : [source];
+        const points = calculatePointsFromTags(nextTags);
 
-      profiles.set(key, {
-        key,
-        username:normalizeUsername(entry.username),
-        region:existing ? existing.region : normalizeRegion(entry.region),
-        overallRank:existing ? existing.overallRank : null,
-        points,
-        title:getTitleByPoints(points),
-        tags:nextTags,
-        tagSources:nextTagSources
+        profiles.set(key, {
+          key,
+          username:normalizeUsername(entry.username),
+          region:existing ? (existing.region || normalizeRegion(entry.region)) : normalizeRegion(entry.region),
+          overallRank:existing ? existing.overallRank : null,
+          points,
+          title:getTitleByPoints(points),
+          tags:nextTags,
+          tagSources:nextTagSources
+        });
       });
     });
-  });
+  };
+
+  mergeTierBoard(dsmData, "dsm");
+  mergeTierBoard(pp57Data, "pp57");
 
   return sortPlayerProfiles(assignOverallRanks(Array.from(profiles.values())));
 }
@@ -4220,7 +4240,8 @@ async function fetchAndRenderTiers(){
     const payload = await response.json();
     renderOverallFromData(payload.overall || {});
     renderDsmFromData(payload.dsm || {});
-    setSearchablePlayerProfiles(buildSearchProfilesFromPayload(payload.overall || {}, payload.dsm || {}));
+    renderPp57FromData(payload.pp57 || {});
+    setSearchablePlayerProfiles(buildSearchProfilesFromPayload(payload.overall || {}, payload.dsm || {}, payload.pp57 || {}));
     refreshOpenPlayerModal();
   } catch (error){
     console.error("Could not refresh tiers from API:", error);
@@ -4246,6 +4267,7 @@ initPlayerSearch();
 if(CLEAR_ALL_PLAYERS){
   clearOverallPlayers();
   renderDsmFromData({});
+  renderPp57FromData({});
 }
 applyTierSync();
 initImageFallbacks();

@@ -102,6 +102,7 @@ function emptyState() {
   return {
     overall: Object.fromEntries(OVERALL_TIERS.map((tier) => [tier, null])),
     dsm: Object.fromEntries(DSM_TIERS.map((tier) => [tier, []])),
+    pp57: Object.fromEntries(DSM_TIERS.map((tier) => [tier, []])),
     updatedAt: new Date().toISOString()
   };
 }
@@ -672,22 +673,35 @@ function parseDsmResultsFromMessage(message) {
   return dedupeDsmResults([...fromEmbeds, ...fromContent]);
 }
 
-function removeDsmUserEverywhere(state, username) {
+function removeTierBoardUserEverywhere(state, boardKey, username) {
+  const tierBoard = state?.[boardKey];
+  if (!tierBoard || typeof tierBoard !== "object") {
+    return;
+  }
+
   const needle = username.toLowerCase();
   DSM_TIERS.forEach((tierKey) => {
-    const list = Array.isArray(state.dsm[tierKey]) ? state.dsm[tierKey] : [];
-    state.dsm[tierKey] = list.filter((entry) => entry.username.toLowerCase() !== needle);
+    const list = Array.isArray(tierBoard[tierKey]) ? tierBoard[tierKey] : [];
+    tierBoard[tierKey] = list.filter((entry) => entry.username.toLowerCase() !== needle);
   });
 }
 
-function getDsmRegionByUsername(state, username) {
+function removeDsmUserEverywhere(state, username) {
+  removeTierBoardUserEverywhere(state, "dsm", username);
+}
+
+function removePp57UserEverywhere(state, username) {
+  removeTierBoardUserEverywhere(state, "pp57", username);
+}
+
+function getTierBoardRegionByUsername(state, boardKey, username) {
   const needle = normalizeUsername(username).toLowerCase();
   if (!needle) {
     return null;
   }
 
   for (const tierKey of DSM_TIERS) {
-    const list = Array.isArray(state?.dsm?.[tierKey]) ? state.dsm[tierKey] : [];
+    const list = Array.isArray(state?.[boardKey]?.[tierKey]) ? state[boardKey][tierKey] : [];
     const match = list.find((entry) => String(entry?.username || "").toLowerCase() === needle);
     const region = parseKnownRegion(match?.region);
     if (region) {
@@ -698,15 +712,28 @@ function getDsmRegionByUsername(state, username) {
   return null;
 }
 
+function getDsmRegionByUsername(state, username) {
+  return getTierBoardRegionByUsername(state, "dsm", username);
+}
+
+function getPp57RegionByUsername(state, username) {
+  return getTierBoardRegionByUsername(state, "pp57", username);
+}
+
 function getOverallRegionByUsername(state, username) {
   const rankKey = getOverallRankByUsername(state, username);
   return rankKey ? parseKnownRegion(state?.overall?.[rankKey]?.region) : null;
 }
 
-function addOrMoveDsmUser(state, { tierInput, usernameInput, highTierInput, positionInput, regionInput }) {
+function addOrMoveTierBoardUser(
+  state,
+  boardKey,
+  { tierInput, usernameInput, highTierInput, positionInput, regionInput },
+  { label = boardKey.toUpperCase() } = {}
+) {
   const parsedTier = parseDsmTierInput(tierInput);
   if (!parsedTier) {
-    return { error: "Invalid DSM tier. Use HT1/LT1..HT5/LT5 or tier-1..tier-5" };
+    return { error: `Invalid ${label} tier. Use HT1/LT1..HT5/LT5 or tier-1..tier-5` };
   }
 
   const username = normalizeUsername(usernameInput);
@@ -714,11 +741,18 @@ function addOrMoveDsmUser(state, { tierInput, usernameInput, highTierInput, posi
     return { error: "username is required" };
   }
 
-  const storedRegion = getDsmRegionByUsername(state, username) || getOverallRegionByUsername(state, username);
-  removeDsmUserEverywhere(state, username);
+  const storedRegion =
+    getTierBoardRegionByUsername(state, boardKey, username) ||
+    getOverallRegionByUsername(state, username);
+  removeTierBoardUserEverywhere(state, boardKey, username);
 
   const targetTier = parsedTier.tier;
-  const targetList = Array.isArray(state.dsm[targetTier]) ? state.dsm[targetTier] : [];
+  const tierBoard = state?.[boardKey];
+  if (!tierBoard || typeof tierBoard !== "object") {
+    return { error: `Tier board '${boardKey}' is not configured` };
+  }
+
+  const targetList = Array.isArray(tierBoard[targetTier]) ? tierBoard[targetTier] : [];
   const highTier = typeof highTierInput === "boolean" ? highTierInput : Boolean(parsedTier.inferredHighTier);
   const incoming = sanitizeDsmEntry({
     username,
@@ -733,11 +767,19 @@ function addOrMoveDsmUser(state, { tierInput, usernameInput, highTierInput, posi
     targetList.push(incoming);
   }
 
-  state.dsm[targetTier] = targetList;
+  tierBoard[targetTier] = targetList;
   return {
     tier: targetTier,
     value: incoming
   };
+}
+
+function addOrMoveDsmUser(state, args) {
+  return addOrMoveTierBoardUser(state, "dsm", args, { label: "DSM" });
+}
+
+function addOrMovePp57User(state, args) {
+  return addOrMoveTierBoardUser(state, "pp57", args, { label: "PP57" });
 }
 
 function getOverallRankByUsername(state, username) {
@@ -768,42 +810,44 @@ function rebuildOverallFromDsm(state, regionHints) {
   );
   const overallEntries = [];
 
-  DSM_TIERS.forEach((tierKey) => {
-    const list = Array.isArray(state.dsm[tierKey]) ? state.dsm[tierKey] : [];
-    list.forEach((rawEntry) => {
-      const entry = sanitizeDsmEntry(rawEntry);
-      if (!entry) {
-        return;
-      }
+  ["dsm", "pp57"].forEach((boardKey) => {
+    DSM_TIERS.forEach((tierKey) => {
+      const list = Array.isArray(state?.[boardKey]?.[tierKey]) ? state[boardKey][tierKey] : [];
+      list.forEach((rawEntry) => {
+        const entry = sanitizeDsmEntry(rawEntry);
+        if (!entry) {
+          return;
+        }
 
-      const tag = mapDsmToOverallTag(tierKey, Boolean(entry.highTier));
-      if (!tag) {
-        return;
-      }
+        const tag = mapDsmToOverallTag(tierKey, Boolean(entry.highTier));
+        if (!tag) {
+          return;
+        }
 
-      const key = entry.username.toLowerCase();
-      const region =
-        parseKnownRegion(entry.region) ||
-        hintMap.get(key) ||
-        existingRegionByUser.get(key) ||
-        null;
+        const key = entry.username.toLowerCase();
+        const region =
+          parseKnownRegion(entry.region) ||
+          hintMap.get(key) ||
+          existingRegionByUser.get(key) ||
+          null;
 
-      if (rawEntry && typeof rawEntry === "object" && !parseKnownRegion(rawEntry.region)) {
-        rawEntry.region = region;
-      }
+        if (rawEntry && typeof rawEntry === "object" && !parseKnownRegion(rawEntry.region)) {
+          rawEntry.region = region;
+        }
 
-      const overallEntry = sanitizeOverallEntry(
-        {
-          username: entry.username,
-          region,
-          tags: [tag]
-        },
-        tag
-      );
+        const overallEntry = sanitizeOverallEntry(
+          {
+            username: entry.username,
+            region,
+            tags: [tag]
+          },
+          tag
+        );
 
-      if (overallEntry) {
-        overallEntries.push(overallEntry);
-      }
+        if (overallEntry) {
+          overallEntries.push(overallEntry);
+        }
+      });
     });
   });
 
@@ -983,7 +1027,15 @@ function sanitizeState(raw) {
     });
   }
 
-  if (DSM_TIERS.some((tier) => Array.isArray(state.dsm[tier]) && state.dsm[tier].length)) {
+  if (raw && typeof raw === "object" && raw.pp57 && typeof raw.pp57 === "object") {
+    DSM_TIERS.forEach((tier) => {
+      const list = Array.isArray(raw.pp57[tier]) ? raw.pp57[tier] : [];
+      state.pp57[tier] = list.map((entry) => sanitizeDsmEntry(entry)).filter(Boolean);
+    });
+  }
+
+  if (DSM_TIERS.some((tier) => Array.isArray(state.dsm[tier]) && state.dsm[tier].length) ||
+      DSM_TIERS.some((tier) => Array.isArray(state.pp57[tier]) && state.pp57[tier].length)) {
     rebuildOverallFromDsm(state);
   }
 
@@ -1018,6 +1070,7 @@ async function writeState(state) {
 }
 
 function applyBulkSyncPayload(state, body) {
+  let shouldRebuildOverall = false;
   if (body?.overall && typeof body.overall === "object") {
     const stagedOverall = Object.fromEntries(
       OVERALL_TIERS.map((rankKey) => [rankKey, sanitizeOverallEntry(state.overall[rankKey], null)])
@@ -1042,20 +1095,40 @@ function applyBulkSyncPayload(state, body) {
         state.dsm[tier] = nextList.map((entry) => sanitizeDsmEntry(entry)).filter(Boolean);
       }
     });
+    shouldRebuildOverall = true;
+  }
 
+  if (body?.pp57 && typeof body.pp57 === "object") {
+    DSM_TIERS.forEach((tier) => {
+      if (Object.prototype.hasOwnProperty.call(body.pp57, tier)) {
+        const nextList = Array.isArray(body.pp57[tier]) ? body.pp57[tier] : [];
+        state.pp57[tier] = nextList.map((entry) => sanitizeDsmEntry(entry)).filter(Boolean);
+      }
+    });
+    shouldRebuildOverall = true;
+  }
+
+  if (shouldRebuildOverall) {
     rebuildOverallFromDsm(state);
   }
 }
 
-function applyDsmResultsPayload(state, results, { replace = false } = {}) {
+function applyTierBoardResultsPayload(state, mode, results, { replace = false } = {}) {
+  const safeMode = String(mode || "dsm").trim().toLowerCase();
   const safeResults = Array.isArray(results) ? results : [];
   if (!safeResults.length) {
     return { error: "results array is required", status: 400 };
   }
 
+  if (safeMode !== "dsm" && safeMode !== "pp57") {
+    return { error: `Invalid mode '${safeMode}', use 'dsm' or 'pp57'`, status: 400 };
+  }
+
+  const modeLabel = safeMode === "dsm" ? "DSM" : "PP57";
+
   if (replace) {
     DSM_TIERS.forEach((tierKey) => {
-      state.dsm[tierKey] = [];
+      state[safeMode][tierKey] = [];
     });
   }
 
@@ -1063,13 +1136,18 @@ function applyDsmResultsPayload(state, results, { replace = false } = {}) {
   const rejected = [];
 
   safeResults.forEach((row, index) => {
-    const addResult = addOrMoveDsmUser(state, {
-      tierInput: row?.tier,
-      usernameInput: row?.username,
-      highTierInput: row?.highTier,
-      positionInput: row?.position,
-      regionInput: row?.region
-    });
+    const addResult = addOrMoveTierBoardUser(
+      state,
+      safeMode,
+      {
+        tierInput: row?.tier,
+        usernameInput: row?.username,
+        highTierInput: row?.highTier,
+        positionInput: row?.position,
+        regionInput: row?.region
+      },
+      { label: modeLabel }
+    );
 
     if (addResult.error) {
       rejected.push({ index, error: addResult.error });
@@ -1085,7 +1163,7 @@ function applyDsmResultsPayload(state, results, { replace = false } = {}) {
   });
 
   if (!applied.length) {
-    return { error: "No valid DSM results to apply", rejected, status: 400 };
+    return { error: `No valid ${modeLabel} results to apply`, rejected, status: 400 };
   }
 
   rebuildOverallFromDsm(state);
@@ -1095,10 +1173,18 @@ function applyDsmResultsPayload(state, results, { replace = false } = {}) {
 
   return {
     ok: true,
-    mode: "dsm",
+    mode: safeMode,
     applied,
     rejected
   };
+}
+
+function applyDsmResultsPayload(state, results, options) {
+  return applyTierBoardResultsPayload(state, "dsm", results, options);
+}
+
+function applyPp57ResultsPayload(state, results, options) {
+  return applyTierBoardResultsPayload(state, "pp57", results, options);
 }
 
 function applySingleTierUpdatePayload(state, body) {
@@ -1158,29 +1244,30 @@ function applySingleTierUpdatePayload(state, body) {
     };
   }
 
-  if (mode !== "dsm") {
-    return { error: `Invalid mode '${mode}', use 'overall' or 'dsm'`, status: 400 };
+  if (mode !== "dsm" && mode !== "pp57") {
+    return { error: `Invalid mode '${mode}', use 'overall', 'dsm', or 'pp57'`, status: 400 };
   }
 
+  const modeLabel = mode === "dsm" ? "DSM" : "PP57";
   const username = normalizeUsername(body?.username);
   const parsedTier = parseDsmTierInput(tier);
 
   if (op === "clear") {
     if (!parsedTier) {
-      return { error: `Invalid DSM tier '${tier}'`, status: 400 };
+      return { error: `Invalid ${modeLabel} tier '${tier}'`, status: 400 };
     }
 
-    state.dsm[parsedTier.tier] = [];
+    state[mode][parsedTier.tier] = [];
     rebuildOverallFromDsm(state);
     return { ok: true, mode, tier: parsedTier.tier, value: [] };
   }
 
   if (op === "remove") {
     if (!username) {
-      return { error: "username is required for dsm remove", status: 400 };
+      return { error: `username is required for ${mode} remove`, status: 400 };
     }
 
-    removeDsmUserEverywhere(state, username);
+    removeTierBoardUserEverywhere(state, mode, username);
     rebuildOverallFromDsm(state);
     return {
       ok: true,
@@ -1191,13 +1278,18 @@ function applySingleTierUpdatePayload(state, body) {
     };
   }
 
-  const addResult = addOrMoveDsmUser(state, {
-    tierInput: tier,
-    usernameInput: body?.username,
-    highTierInput: body?.highTier,
-    positionInput: body?.position,
-    regionInput: body?.region
-  });
+  const addResult = addOrMoveTierBoardUser(
+    state,
+    mode,
+    {
+      tierInput: tier,
+      usernameInput: body?.username,
+      highTierInput: body?.highTier,
+      positionInput: body?.position,
+      regionInput: body?.region
+    },
+    { label: modeLabel }
+  );
 
   if (addResult.error) {
     return { error: addResult.error, status: 400 };
@@ -1211,14 +1303,14 @@ function applySingleTierUpdatePayload(state, body) {
     tier: addResult.tier,
     overallTier,
     player: addResult.value,
-    value: state.dsm[addResult.tier]
+    value: state[mode][addResult.tier]
   };
 }
 
 function applyWebhookPayload(state, body) {
   const safeBody = body && typeof body === "object" ? body : {};
 
-  if (safeBody.overall || safeBody.dsm) {
+  if (safeBody.overall || safeBody.dsm || safeBody.pp57) {
     applyBulkSyncPayload(state, safeBody);
     return { ok: true, mode: "bulk" };
   }
@@ -1232,7 +1324,8 @@ function applyWebhookPayload(state, body) {
         : null;
 
   if (groupedResults) {
-    return applyDsmResultsPayload(state, groupedResults, { replace: Boolean(safeBody.replace) });
+    const mode = String(safeBody.mode || "dsm").trim().toLowerCase();
+    return applyTierBoardResultsPayload(state, mode, groupedResults, { replace: Boolean(safeBody.replace) });
   }
 
   return applySingleTierUpdatePayload(state, safeBody);
@@ -1361,24 +1454,25 @@ app.post("/api/update-tier", requireSecret, async (req, res) => {
       });
     }
 
-    if (mode === "dsm") {
+    if (mode === "dsm" || mode === "pp57") {
+      const modeLabel = mode === "dsm" ? "DSM" : "PP57";
       const username = normalizeUsername(req.body?.username);
       const parsedTier = parseDsmTierInput(tier);
 
       if (op === "clear") {
         if (!parsedTier) {
-          return res.status(400).json({ error: `Invalid DSM tier '${tier}'` });
+          return res.status(400).json({ error: `Invalid ${modeLabel} tier '${tier}'` });
         }
-        state.dsm[parsedTier.tier] = [];
+        state[mode][parsedTier.tier] = [];
         rebuildOverallFromDsm(state);
         await writeState(state);
         return res.json({ ok: true, mode, tier: parsedTier.tier, value: [], updatedAt: state.updatedAt });
       } else if (op === "remove") {
         if (!username) {
-          return res.status(400).json({ error: "username is required for dsm remove" });
+          return res.status(400).json({ error: `username is required for ${mode} remove` });
         }
 
-        removeDsmUserEverywhere(state, username);
+        removeTierBoardUserEverywhere(state, mode, username);
         rebuildOverallFromDsm(state);
         await writeState(state);
         return res.json({
@@ -1390,13 +1484,18 @@ app.post("/api/update-tier", requireSecret, async (req, res) => {
           updatedAt: state.updatedAt
         });
       } else {
-        const addResult = addOrMoveDsmUser(state, {
-          tierInput: tier,
-          usernameInput: req.body?.username,
-          highTierInput: req.body?.highTier,
-          positionInput: req.body?.position,
-          regionInput: req.body?.region
-        });
+        const addResult = addOrMoveTierBoardUser(
+          state,
+          mode,
+          {
+            tierInput: tier,
+            usernameInput: req.body?.username,
+            highTierInput: req.body?.highTier,
+            positionInput: req.body?.position,
+            regionInput: req.body?.region
+          },
+          { label: modeLabel }
+        );
         if (addResult.error) {
           return res.status(400).json({ error: addResult.error });
         }
@@ -1409,13 +1508,13 @@ app.post("/api/update-tier", requireSecret, async (req, res) => {
           mode,
           tier: addResult.tier,
           overallTier,
-          value: state.dsm[addResult.tier],
+          value: state[mode][addResult.tier],
           updatedAt: state.updatedAt
         });
       }
     }
 
-    return res.status(400).json({ error: `Invalid mode '${mode}', use 'overall' or 'dsm'` });
+    return res.status(400).json({ error: `Invalid mode '${mode}', use 'overall', 'dsm', or 'pp57'` });
   } catch (error) {
     console.error("POST /api/update-tier failed:", error);
     return res.status(500).json({ error: "Failed to update tier" });
@@ -1519,6 +1618,103 @@ app.post("/api/dsm-results", requireSecret, async (req, res) => {
   }
 });
 
+app.post("/api/pp57-result", requireSecret, async (req, res) => {
+  try {
+    const state = await readState();
+    const addResult = addOrMovePp57User(state, {
+      tierInput: req.body?.tier,
+      usernameInput: req.body?.username,
+      highTierInput: req.body?.highTier,
+      positionInput: req.body?.position,
+      regionInput: req.body?.region
+    });
+
+    if (addResult.error) {
+      return res.status(400).json({ error: addResult.error });
+    }
+
+    rebuildOverallFromDsm(state);
+    const overallTier = getOverallRankByUsername(state, addResult.value.username);
+    await writeState(state);
+    return res.json({
+      ok: true,
+      mode: "pp57",
+      tier: addResult.tier,
+      overallTier,
+      player: addResult.value,
+      value: state.pp57[addResult.tier],
+      updatedAt: state.updatedAt
+    });
+  } catch (error) {
+    console.error("POST /api/pp57-result failed:", error);
+    return res.status(500).json({ error: "Failed to update PP57 result" });
+  }
+});
+
+app.post("/api/pp57-results", requireSecret, async (req, res) => {
+  const results = Array.isArray(req.body) ? req.body : Array.isArray(req.body?.results) ? req.body.results : [];
+  const replace = Array.isArray(req.body) ? false : Boolean(req.body?.replace);
+
+  if (!results.length) {
+    return res.status(400).json({ error: "results array is required" });
+  }
+
+  try {
+    const state = await readState();
+
+    if (replace) {
+      DSM_TIERS.forEach((tierKey) => {
+        state.pp57[tierKey] = [];
+      });
+    }
+
+    const applied = [];
+    const rejected = [];
+
+    results.forEach((row, index) => {
+      const addResult = addOrMovePp57User(state, {
+        tierInput: row?.tier,
+        usernameInput: row?.username,
+        highTierInput: row?.highTier,
+        positionInput: row?.position,
+        regionInput: row?.region
+      });
+
+      if (addResult.error) {
+        rejected.push({ index, error: addResult.error });
+      } else {
+        applied.push({
+          index,
+          tier: addResult.tier,
+          username: addResult.value.username,
+          highTier: addResult.value.highTier
+        });
+      }
+    });
+
+    if (!applied.length) {
+      return res.status(400).json({ error: "No valid PP57 results to apply", rejected });
+    }
+
+    rebuildOverallFromDsm(state);
+    applied.forEach((entry) => {
+      entry.overallTier = getOverallRankByUsername(state, entry.username);
+    });
+
+    await writeState(state);
+    return res.json({
+      ok: true,
+      mode: "pp57",
+      applied,
+      rejected,
+      updatedAt: state.updatedAt
+    });
+  } catch (error) {
+    console.error("POST /api/pp57-results failed:", error);
+    return res.status(500).json({ error: "Failed to update PP57 results" });
+  }
+});
+
 app.post("/api/bulk-sync", requireSecret, async (req, res) => {
   try {
     const state = await readState();
@@ -1540,6 +1736,8 @@ app.post("/api/bulk-sync", requireSecret, async (req, res) => {
       writeOverallEntriesByPoints(state, Object.values(stagedOverall).filter(Boolean));
     }
 
+    let shouldRebuildOverall = false;
+
     if (req.body?.dsm && typeof req.body.dsm === "object") {
       DSM_TIERS.forEach((tier) => {
         if (Object.prototype.hasOwnProperty.call(req.body.dsm, tier)) {
@@ -1547,7 +1745,20 @@ app.post("/api/bulk-sync", requireSecret, async (req, res) => {
           state.dsm[tier] = nextList.map((entry) => sanitizeDsmEntry(entry)).filter(Boolean);
         }
       });
+      shouldRebuildOverall = true;
+    }
 
+    if (req.body?.pp57 && typeof req.body.pp57 === "object") {
+      DSM_TIERS.forEach((tier) => {
+        if (Object.prototype.hasOwnProperty.call(req.body.pp57, tier)) {
+          const nextList = Array.isArray(req.body.pp57[tier]) ? req.body.pp57[tier] : [];
+          state.pp57[tier] = nextList.map((entry) => sanitizeDsmEntry(entry)).filter(Boolean);
+        }
+      });
+      shouldRebuildOverall = true;
+    }
+
+    if (shouldRebuildOverall) {
       rebuildOverallFromDsm(state);
     }
 
