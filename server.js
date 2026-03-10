@@ -17,6 +17,20 @@ const DISCORD_SOURCE_CHANNEL_IDS = new Set(parseEnvList(
   process.env.DISCORD_SOURCE_CHANNEL_IDS,
   DISCORD_SOURCE_CHANNEL_ID ? [DISCORD_SOURCE_CHANNEL_ID] : []
 ));
+const DISCORD_SOURCE_CHANNEL_ID_DSM = String(process.env.DISCORD_SOURCE_CHANNEL_ID_DSM || "").trim();
+const DISCORD_SOURCE_CHANNEL_IDS_DSM = new Set(parseEnvList(
+  process.env.DISCORD_SOURCE_CHANNEL_IDS_DSM,
+  DISCORD_SOURCE_CHANNEL_ID_DSM ? [DISCORD_SOURCE_CHANNEL_ID_DSM] : []
+));
+const DISCORD_SOURCE_CHANNEL_ID_PP57 = String(process.env.DISCORD_SOURCE_CHANNEL_ID_PP57 || "").trim();
+const DISCORD_SOURCE_CHANNEL_IDS_PP57 = new Set(parseEnvList(
+  process.env.DISCORD_SOURCE_CHANNEL_IDS_PP57,
+  DISCORD_SOURCE_CHANNEL_ID_PP57 ? [DISCORD_SOURCE_CHANNEL_ID_PP57] : []
+));
+const DISCORD_SOURCE_CHANNEL_MODES = new Map();
+DISCORD_SOURCE_CHANNEL_IDS.forEach((channelId) => setDiscordChannelMode(DISCORD_SOURCE_CHANNEL_MODES, channelId, "dsm"));
+DISCORD_SOURCE_CHANNEL_IDS_DSM.forEach((channelId) => setDiscordChannelMode(DISCORD_SOURCE_CHANNEL_MODES, channelId, "dsm"));
+DISCORD_SOURCE_CHANNEL_IDS_PP57.forEach((channelId) => setDiscordChannelMode(DISCORD_SOURCE_CHANNEL_MODES, channelId, "pp57"));
 const DISCORD_SOURCE_GUILD_IDS = new Set(parseEnvList(process.env.DISCORD_SOURCE_GUILD_IDS));
 const DISCORD_SOURCE_BOT_ID = String(process.env.DISCORD_SOURCE_BOT_ID || "").trim();
 const DISCORD_SOURCE_BOT_IDS = new Set(parseEnvList(
@@ -68,6 +82,24 @@ function parseEnvList(value, fallback = []) {
     .filter(Boolean);
 
   return raw.length ? raw : seed;
+}
+
+function setDiscordChannelMode(map, channelId, mode) {
+  if (!(map instanceof Map)) {
+    return;
+  }
+
+  const id = String(channelId || "").trim();
+  if (!id) {
+    return;
+  }
+
+  const safeMode = mode === "pp57" ? "pp57" : "dsm";
+  const existing = map.get(id);
+  if (existing && existing !== safeMode) {
+    console.warn(`[discord] Channel ${id} configured for '${existing}' and '${safeMode}'. Using '${safeMode}'.`);
+  }
+  map.set(id, safeMode);
 }
 
 function normalizeOrigin(value) {
@@ -854,7 +886,9 @@ function rebuildOverallFromDsm(state, regionHints) {
   writeOverallEntriesByPoints(state, overallEntries);
 }
 
-async function applyDiscordDsmResults(results, sourceLabel) {
+async function applyDiscordTierBoardResults(mode, results, sourceLabel) {
+  const safeMode = mode === "pp57" ? "pp57" : "dsm";
+  const modeLabel = safeMode === "pp57" ? "PP57" : "DSM";
   discordWriteQueue = discordWriteQueue.then(async () => {
     const state = await readState();
     const applied = [];
@@ -862,7 +896,7 @@ async function applyDiscordDsmResults(results, sourceLabel) {
     const regionHints = new Map();
 
     results.forEach((row, index) => {
-      const addResult = addOrMoveDsmUser(state, row);
+      const addResult = addOrMoveTierBoardUser(state, safeMode, row, { label: modeLabel });
       if (addResult.error) {
         rejected.push({ index, error: addResult.error });
         return;
@@ -894,12 +928,12 @@ async function applyDiscordDsmResults(results, sourceLabel) {
     });
 
     await writeState(state);
-    console.log(`[discord] Applied ${applied.length} DSM result(s) from ${sourceLabel}`);
+    console.log(`[discord] Applied ${applied.length} ${modeLabel} result(s) from ${sourceLabel}`);
     if (rejected.length) {
-      console.warn(`[discord] Rejected ${rejected.length} DSM result(s) from ${sourceLabel}`);
+      console.warn(`[discord] Rejected ${rejected.length} ${modeLabel} result(s) from ${sourceLabel}`);
     }
   }).catch((error) => {
-    console.error("[discord] Failed to apply DSM results:", error);
+    console.error(`[discord] Failed to apply ${modeLabel} results:`, error);
   });
 
   return discordWriteQueue;
@@ -918,23 +952,25 @@ function logDiscordIntentHelp(error) {
   console.error("[discord] 4) Restart this server");
 }
 
-function isAllowedDiscordSource(message) {
+function getDiscordTierBoardMode(message) {
   if (!message || !message.channelId) {
-    return false;
+    return null;
   }
 
-  const matchesChannel = DISCORD_SOURCE_CHANNEL_IDS.size
-    ? DISCORD_SOURCE_CHANNEL_IDS.has(message.channelId)
-    : false;
+  const byChannel = DISCORD_SOURCE_CHANNEL_MODES.get(message.channelId) || null;
+  if (byChannel) {
+    return byChannel;
+  }
+
   const matchesGuild = DISCORD_SOURCE_GUILD_IDS.size
     ? Boolean(message.guildId) && DISCORD_SOURCE_GUILD_IDS.has(message.guildId)
     : false;
 
-  return matchesChannel || matchesGuild;
+  return matchesGuild ? "dsm" : null;
 }
 
 function startDiscordBridge() {
-  if (!DISCORD_BOT_TOKEN || (!DISCORD_SOURCE_CHANNEL_IDS.size && !DISCORD_SOURCE_GUILD_IDS.size)) {
+  if (!DISCORD_BOT_TOKEN || (!DISCORD_SOURCE_CHANNEL_MODES.size && !DISCORD_SOURCE_GUILD_IDS.size)) {
     console.log("[discord] Bridge disabled (set DISCORD_BOT_TOKEN and at least one source channel or guild to enable).");
     return;
   }
@@ -959,8 +995,24 @@ function startDiscordBridge() {
   client.once("clientReady", () => {
     const tag = client.user ? client.user.tag : "unknown";
     const targets = [];
-    if (DISCORD_SOURCE_CHANNEL_IDS.size) {
-      targets.push(`channels ${Array.from(DISCORD_SOURCE_CHANNEL_IDS).join(", ")}`);
+    const dsmChannels = [];
+    const pp57Channels = [];
+    DISCORD_SOURCE_CHANNEL_MODES.forEach((mode, channelId) => {
+      if (mode === "pp57") {
+        pp57Channels.push(channelId);
+      } else {
+        dsmChannels.push(channelId);
+      }
+    });
+
+    dsmChannels.sort();
+    pp57Channels.sort();
+
+    if (dsmChannels.length) {
+      targets.push(`DSM channels ${dsmChannels.join(", ")}`);
+    }
+    if (pp57Channels.length) {
+      targets.push(`PP57 channels ${pp57Channels.join(", ")}`);
     }
     if (DISCORD_SOURCE_GUILD_IDS.size) {
       targets.push(`guilds ${Array.from(DISCORD_SOURCE_GUILD_IDS).join(", ")}`);
@@ -969,7 +1021,8 @@ function startDiscordBridge() {
   });
 
   client.on("messageCreate", async (message) => {
-    if (!isAllowedDiscordSource(message)) {
+    const mode = getDiscordTierBoardMode(message);
+    if (!mode) {
       return;
     }
 
@@ -990,7 +1043,7 @@ function startDiscordBridge() {
       return;
     }
 
-    await applyDiscordDsmResults(parsedResults, `Discord message ${message.id}`);
+    await applyDiscordTierBoardResults(mode, parsedResults, `Discord message ${message.id}`);
   });
 
   client.login(DISCORD_BOT_TOKEN).catch((error) => {
