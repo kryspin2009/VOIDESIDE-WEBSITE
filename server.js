@@ -199,6 +199,30 @@ function normalizeTags(value, fallbackTag) {
   return safeFallbackTag ? [safeFallbackTag] : [];
 }
 
+function normalizeTagSource(value, fallback = "dsm") {
+  const raw = String(value || "").trim().toLowerCase();
+  if (raw === "pp57") {
+    return "pp57";
+  }
+  if (raw === "dsm") {
+    return "dsm";
+  }
+  return fallback === "pp57" ? "pp57" : "dsm";
+}
+
+function normalizeTagSources(value, tagCount, fallbackSource) {
+  const fallback = normalizeTagSource(fallbackSource, "dsm");
+  if (!Number.isFinite(tagCount) || tagCount <= 0) {
+    return [];
+  }
+
+  if (!Array.isArray(value)) {
+    return Array.from({ length: tagCount }, () => fallback);
+  }
+
+  return Array.from({ length: tagCount }, (_, index) => normalizeTagSource(value[index], fallback));
+}
+
 function calculateOverallPoints(tags, fallbackTag = null) {
   return normalizeTags(tags, fallbackTag).reduce((total, tag) => total + (TIER_POINTS[tag] || 0), 0);
 }
@@ -252,10 +276,15 @@ function writeOverallEntriesByPoints(state, entries) {
     }
 
     const existing = byUsername.get(key);
+    const existingTags = normalizeTags(existing.tags, null);
+    const incomingTags = normalizeTags(safeEntry.tags, null);
+    const existingSources = normalizeTagSources(existing.tagSources, existingTags.length, "dsm");
+    const incomingSources = normalizeTagSources(safeEntry.tagSources, incomingTags.length, "dsm");
     byUsername.set(key, {
       ...existing,
       region: safeEntry.region || existing.region,
-      tags: [...normalizeTags(existing.tags, null), ...normalizeTags(safeEntry.tags, null)],
+      tags: [...existingTags, ...incomingTags],
+      tagSources: [...existingSources, ...incomingSources],
       _order: Math.min(existing._order, index)
     });
   });
@@ -298,7 +327,8 @@ function sanitizeOverallEntry(input, fallbackTag) {
     return {
       username,
       region: null,
-      tags: [safeFallbackTag]
+      tags: [safeFallbackTag],
+      tagSources: ["dsm"]
     };
   }
 
@@ -316,10 +346,13 @@ function sanitizeOverallEntry(input, fallbackTag) {
     return null;
   }
 
+  const fallbackSource = normalizeTagSource(input.tagSource || input.source, "dsm");
+  const tagSources = normalizeTagSources(input.tagSources, tags.length, fallbackSource);
   return {
     username,
     region: normalizeRegion(input.region),
-    tags
+    tags,
+    tagSources
   };
 }
 
@@ -871,7 +904,8 @@ function rebuildOverallFromDsm(state, regionHints) {
           {
             username: entry.username,
             region,
-            tags: [tag]
+            tags: [tag],
+            tagSources: [boardKey]
           },
           tag
         );
@@ -1481,7 +1515,10 @@ app.post("/api/update-tier", requireSecret, async (req, res) => {
           {
             username: req.body?.username,
             region: req.body?.region,
-            tags: explicitTagInput
+            tags: explicitTagInput,
+            tagSources: req.body?.tagSources,
+            tagSource: req.body?.tagSource,
+            source: req.body?.source
           },
           effectiveFallbackTag
         );

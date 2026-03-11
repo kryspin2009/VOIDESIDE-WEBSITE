@@ -681,8 +681,8 @@ button.discord-menu-item:focus-visible{
 }
 
 .mode-tab .tab-ico-image{
-  width:36px;
-  height:36px;
+  width:50px;
+  height:60px;
   margin-bottom:6px;
   object-fit:contain;
   filter:drop-shadow(0 0 7px rgba(126,205,255,0.5));
@@ -1256,6 +1256,13 @@ h1{
 .tier-tag.source-dsm::before{
   background:
     url("./assets/dsm.png") center/64% 64% no-repeat,
+    rgba(17,29,50,0.96);
+  box-shadow:none;
+}
+
+.tier-tag.source-pp57::before{
+  background:
+    url("./assets/pp57.png") center/64% 64% no-repeat,
     rgba(17,29,50,0.96);
   box-shadow:none;
 }
@@ -2609,14 +2616,14 @@ h1{
      kind:"dsm",
      iconSrc:"./assets/dsm.png"
    },
-   {
-     id:"pp57-view",
-     code:"PP57",
-     label:"PP57",
-     kind:"dsm",
-     iconSrc:"https://assets.grok.com/users/36786066-843a-46f2-afc7-859bc47b88ee/generated/71bb18ca-f5db-429b-a68d-0ffab877d848/image.jpg"
-   }
-  ];
+    {
+      id:"pp57-view",
+      code:"PP57",
+      label:"PP57",
+      kind:"dsm",
+      iconSrc:"./assets/pp57.png"
+    }
+   ];
 
 const OVERALL_RANK_IDS = ["rank1","rank2","rank3","rank4","rank5","rank6","rank7","rank8","rank9","rank10"];
 const LEGACY_OVERALL_IDS = ["ht1","lt1","ht2","lt2","ht3","lt3","ht4","lt4","ht5","lt5"];
@@ -3497,6 +3504,8 @@ function sortAndStyleTierTagsContainer(tagsWrap){
       tag.className = "tier-tag";
       if(source === "dsm"){
         tag.classList.add("source-dsm");
+      } else if(source === "pp57"){
+        tag.classList.add("source-pp57");
       }
       tag.textContent = key;
       return;
@@ -3507,6 +3516,8 @@ function sortAndStyleTierTagsContainer(tagsWrap){
     tag.className = `tier-tag t${tierNum} ${isLower ? "lt" : "ht"}`;
     if(source === "dsm"){
       tag.classList.add("source-dsm");
+    } else if(source === "pp57"){
+      tag.classList.add("source-pp57");
     }
     tag.textContent = formatTierTagLabel(key);
   });

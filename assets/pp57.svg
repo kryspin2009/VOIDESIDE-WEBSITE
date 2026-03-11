@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="blade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4a5d70"/>
+      <stop offset="1" stop-color="#1b2530"/>
+    </linearGradient>
+    <linearGradient id="handle" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1a212a"/>
+      <stop offset="1" stop-color="#0b1117"/>
+    </linearGradient>
+  </defs>
+
+  <g transform="translate(64 64) rotate(35) scale(0.92) translate(-64 -64)">
+    <path
+      d="M64 10 L79 25 L79 86 L49 86 L49 25 Z"
+      fill="url(#blade)"
+      stroke="#8c5bff"
+      stroke-width="6"
+      stroke-linejoin="round"
+      stroke-linecap="round"
+    />
+    <path d="M64 18 L72 28 L72 82 L56 82 L56 28 Z" fill="#ffffff" fill-opacity="0.08"/>
+
+    <rect
+      x="39"
+      y="86"
+      width="50"
+      height="14"
+      rx="4"
+      fill="url(#handle)"
+      stroke="#2f3a46"
+      stroke-width="4"
+      stroke-linejoin="round"
+    />
+
+    <rect
+      x="56"
+      y="100"
+      width="16"
+      height="22"
+      rx="4"
+      fill="url(#handle)"
+      stroke="#2f3a46"
+      stroke-width="4"
+      stroke-linejoin="round"
+    />
+
+    <circle cx="64" cy="122" r="6" fill="#0b1117" stroke="#2f3a46" stroke-width="4"/>
+  </g>
+</svg>
