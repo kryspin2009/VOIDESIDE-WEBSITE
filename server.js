@@ -991,21 +991,26 @@ function getDiscordTierBoardMode(message) {
     return null;
   }
 
-  const allowedByChannel = DISCORD_SOURCE_CHANNEL_MODES.has(message.channelId);
+  const byChannel = DISCORD_SOURCE_CHANNEL_MODES.get(message.channelId) || null;
   const matchesGuild = DISCORD_SOURCE_GUILD_IDS.size
     ? Boolean(message.guildId) && DISCORD_SOURCE_GUILD_IDS.has(message.guildId)
     : false;
 
-  if (!allowedByChannel && !matchesGuild) {
+  if (!byChannel && !matchesGuild) {
     return null;
   }
 
   const guildName = String(message.guild?.name || "");
-  if (guildName.toLowerCase().includes("pp57")) {
+  const guildToken = guildName.toLowerCase().replace(/[^a-z0-9]/g, "");
+  if (guildToken.includes("pp57")) {
     return "pp57";
   }
 
-  return "dsm";
+  if (guildToken.includes("dsm") || guildToken.includes("diamondspearmace")) {
+    return "dsm";
+  }
+
+  return byChannel || "dsm";
 }
 
 function startDiscordBridge() {
