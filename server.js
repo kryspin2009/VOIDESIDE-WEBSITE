@@ -991,22 +991,18 @@ function getDiscordTierBoardMode(message) {
     return null;
   }
 
-  const byChannel = DISCORD_SOURCE_CHANNEL_MODES.get(message.channelId) || null;
+  const allowedByChannel = DISCORD_SOURCE_CHANNEL_MODES.has(message.channelId);
   const matchesGuild = DISCORD_SOURCE_GUILD_IDS.size
     ? Boolean(message.guildId) && DISCORD_SOURCE_GUILD_IDS.has(message.guildId)
     : false;
 
-  if (!byChannel && !matchesGuild) {
+  if (!allowedByChannel && !matchesGuild) {
     return null;
   }
 
   const guildName = String(message.guild?.name || "");
   if (guildName.toLowerCase().includes("pp57")) {
     return "pp57";
-  }
-
-  if (byChannel) {
-    return byChannel;
   }
 
   return "dsm";
