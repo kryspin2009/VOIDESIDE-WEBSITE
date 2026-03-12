@@ -987,30 +987,40 @@ function logDiscordIntentHelp(error) {
 }
 
 function getDiscordTierBoardMode(message) {
-  if (!message || !message.channelId) {
-    return null;
-  }
-
-  const byChannel = DISCORD_SOURCE_CHANNEL_MODES.get(message.channelId) || null;
-  const matchesGuild = DISCORD_SOURCE_GUILD_IDS.size
-    ? Boolean(message.guildId) && DISCORD_SOURCE_GUILD_IDS.has(message.guildId)
-    : false;
-
-  if (!byChannel && !matchesGuild) {
+  if (!message) {
     return null;
   }
 
   const guildName = String(message.guild?.name || "");
   const guildToken = guildName.toLowerCase().replace(/[^a-z0-9]/g, "");
-  if (guildToken.includes("pp57")) {
-    return "pp57";
+  const guildMode = guildToken.includes("pp57")
+    ? "pp57"
+    : guildToken.includes("dsm") || guildToken.includes("diamondspearmace")
+      ? "dsm"
+      : null;
+
+  const channelId = String(message.channelId || "").trim();
+  if (!channelId) {
+    return guildMode;
   }
 
-  if (guildToken.includes("dsm") || guildToken.includes("diamondspearmace")) {
-    return "dsm";
+  const byChannel = DISCORD_SOURCE_CHANNEL_MODES.get(channelId) || null;
+  const parentId = String(message.channel?.parentId || "").trim();
+  const byParent = parentId ? DISCORD_SOURCE_CHANNEL_MODES.get(parentId) || null : null;
+  const byAnyChannel = byChannel || byParent;
+  const matchesGuild = DISCORD_SOURCE_GUILD_IDS.size
+    ? Boolean(message.guildId) && DISCORD_SOURCE_GUILD_IDS.has(message.guildId)
+    : false;
+
+  if (!byAnyChannel && !matchesGuild && !guildMode) {
+    return null;
   }
 
-  return byChannel || "dsm";
+  if (guildMode) {
+    return guildMode;
+  }
+
+  return byAnyChannel || "dsm";
 }
 
 function startDiscordBridge() {
@@ -1070,7 +1080,7 @@ function startDiscordBridge() {
       return;
     }
 
-    if (DISCORD_SOURCE_BOT_IDS.size && !DISCORD_SOURCE_BOT_IDS.has(String(message.author?.id || ""))) {
+    if (mode !== "pp57" && DISCORD_SOURCE_BOT_IDS.size && !DISCORD_SOURCE_BOT_IDS.has(String(message.author?.id || ""))) {
       return;
     }
 
