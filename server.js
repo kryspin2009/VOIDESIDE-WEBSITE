@@ -992,12 +992,14 @@ function getDiscordTierBoardMode(message) {
   }
 
   const guildName = String(message.guild?.name || "");
-  const guildToken = guildName.toLowerCase().replace(/[^a-z0-9]/g, "");
-  const guildMode = guildToken.includes("pp57")
-    ? "pp57"
-    : guildToken.includes("dsm") || guildToken.includes("diamondspearmace")
-      ? "dsm"
-      : null;
+  const guildLower = guildName.toLowerCase();
+  const guildToken = guildLower.replace(/[^a-z0-9]/g, "");
+  const guildMode =
+    guildToken.includes("pp57") || guildLower.includes("pp57")
+      ? "pp57"
+      : guildToken.includes("diamondspearmace") || guildLower.includes("diamond spear mace")
+        ? "dsm"
+        : null;
 
   const channelId = String(message.channelId || "").trim();
   if (!channelId) {
