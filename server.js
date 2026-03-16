@@ -27,10 +27,23 @@ const DISCORD_SOURCE_CHANNEL_IDS_PP57 = new Set(parseEnvList(
   process.env.DISCORD_SOURCE_CHANNEL_IDS_PP57,
   DISCORD_SOURCE_CHANNEL_ID_PP57 ? [DISCORD_SOURCE_CHANNEL_ID_PP57] : []
 ));
+const DISCORD_GUILD_ID_PP57 = String(process.env.DISCORD_GUILD_ID_PP57 || "1475148192315080818").trim();
+const DISCORD_GUILD_ID_DSM = String(process.env.DISCORD_GUILD_ID_DSM || "1473278000035397842").trim();
 const DISCORD_SOURCE_CHANNEL_MODES = new Map();
 DISCORD_SOURCE_CHANNEL_IDS.forEach((channelId) => setDiscordChannelMode(DISCORD_SOURCE_CHANNEL_MODES, channelId, "dsm"));
 DISCORD_SOURCE_CHANNEL_IDS_DSM.forEach((channelId) => setDiscordChannelMode(DISCORD_SOURCE_CHANNEL_MODES, channelId, "dsm"));
 DISCORD_SOURCE_CHANNEL_IDS_PP57.forEach((channelId) => setDiscordChannelMode(DISCORD_SOURCE_CHANNEL_MODES, channelId, "pp57"));
+const DISCORD_SOURCE_CHANNEL_IDS_BY_MODE = {
+  dsm: new Set(),
+  pp57: new Set()
+};
+DISCORD_SOURCE_CHANNEL_MODES.forEach((mode, channelId) => {
+  if (mode === "pp57") {
+    DISCORD_SOURCE_CHANNEL_IDS_BY_MODE.pp57.add(channelId);
+  } else {
+    DISCORD_SOURCE_CHANNEL_IDS_BY_MODE.dsm.add(channelId);
+  }
+});
 const DISCORD_SOURCE_GUILD_IDS = new Set(parseEnvList(process.env.DISCORD_SOURCE_GUILD_IDS));
 const DISCORD_SOURCE_BOT_ID = String(process.env.DISCORD_SOURCE_BOT_ID || "").trim();
 const DISCORD_SOURCE_BOT_IDS = new Set(parseEnvList(
@@ -395,10 +408,70 @@ function sanitizeDsmEntry(input) {
   return safeEntry;
 }
 
+function stripTierBoardLabelTokens(value) {
+  return String(value || "")
+    .replace(/\bpp\s*57\b/gi, " ")
+    .replace(/\bpp57\b/gi, " ")
+    .replace(/\bdiamond\s*spear\s*mace\b/gi, " ")
+    .replace(/\bdsm\b/gi, " ");
+}
+
 function extractMinecraftUsername(value) {
-  const text = String(value || "");
-  const match = text.match(/[A-Za-z0-9_]{1,16}/);
-  return match ? match[0] : "";
+  const text = stripTierBoardLabelTokens(value)
+    .replace(/<@!?\d+>/g, " ")
+    .replace(/<@&\d+>/g, " ")
+    .replace(/<#\d+>/g, " ");
+  const matches = text.match(/[A-Za-z0-9_]{3,16}/g) || [];
+  const ignored = new Set([
+    "pp57",
+    "dsm",
+    "diamond",
+    "spear",
+    "mace",
+    "tier",
+    "tiers",
+    "rank",
+    "ranks",
+    "result",
+    "results",
+    "region",
+    "user",
+    "username",
+    "player",
+    "ign",
+    "everyone",
+    "here",
+    "tester",
+    "tested"
+  ]);
+
+  for (const candidate of matches) {
+    const token = String(candidate || "").trim();
+    if (!token) {
+      continue;
+    }
+
+    if (/^\d{15,16}$/.test(token)) {
+      continue;
+    }
+
+    const lower = token.toLowerCase();
+    if (ignored.has(lower)) {
+      continue;
+    }
+
+    if (parseDsmTierInput(token)) {
+      continue;
+    }
+
+    if (parseKnownRegion(token) || isLikelyRegionToken(token) || extractRegionFromText(token)) {
+      continue;
+    }
+
+    return token;
+  }
+
+  return "";
 }
 
 function extractRegionFromText(value) {
@@ -451,7 +524,15 @@ function isLikelyRegionToken(value) {
 
 function isDiscordMentionToken(value) {
   const token = String(value || "").trim();
-  return /^<@!?\d+>$/.test(token) || token.startsWith("@");
+  if (!token) {
+    return false;
+  }
+
+  if (token === "@everyone" || token === "@here") {
+    return true;
+  }
+
+  return /^<@!?\d+>$/.test(token) || /^<@&\d+>$/.test(token) || /^<#\d+>$/.test(token);
 }
 
 function parseDsmTierInput(value) {
@@ -518,8 +599,9 @@ function parseDsmLine(line) {
     const remainingText = tokens
       .filter((_, current) => current !== index && !isDiscordMentionToken(tokens[current]))
       .join(" ");
-    const regionInput = extractRegionFromText(remainingText);
-    const usernameText = stripRegionFromText(remainingText);
+    const cleanedText = stripTierBoardLabelTokens(remainingText);
+    const regionInput = extractRegionFromText(cleanedText);
+    const usernameText = stripRegionFromText(cleanedText);
     const username = extractMinecraftUsername(usernameText);
     if (!username) {
       return null;
@@ -639,6 +721,8 @@ function parseDsmResultFromEmbed(embed) {
   const title = String(embed.title || "");
   const description = String(embed.description || "");
   const fields = Array.isArray(embed.fields) ? embed.fields : [];
+  const authorName = String(embed.author?.name || "");
+  const footerText = String(embed.footer?.text || "");
 
   // Preferred source for tier from your format: "Result - LT3".
   let tierInput = extractTierInputFromText(title, false);
@@ -655,6 +739,10 @@ function parseDsmResultFromEmbed(embed) {
     tierInput = extractTierInputFromText(description, true);
   }
 
+  if (!tierInput) {
+    tierInput = extractTierInputFromText(footerText, true);
+  }
+
   // Preferred source for username from your format: "@x | username | region".
   let usernameInput = extractUsernameFromEmbedDescription(description);
   let regionInput = extractRegionFromEmbedDescription(description);
@@ -667,11 +755,23 @@ function parseDsmResultFromEmbed(embed) {
     regionInput = extractRegionFromText(title);
   }
 
+  if (!regionInput) {
+    regionInput = extractRegionFromText(footerText);
+  }
+
   if (!usernameInput) {
     const userField = fields.find((field) => /user|username|player|ign|tester/i.test(String(field?.name || "")));
     if (userField) {
       usernameInput = extractMinecraftUsername(String(userField.value || ""));
     }
+  }
+
+  if (!usernameInput) {
+    usernameInput = extractMinecraftUsername(authorName);
+  }
+
+  if (!usernameInput) {
+    usernameInput = extractMinecraftUsername(footerText);
   }
 
   if (!tierInput || !usernameInput) {
@@ -707,6 +807,13 @@ function parseDsmResultsFromContent(content) {
       results.push(parsed);
     }
   });
+
+  if (!results.length && !DISCORD_RESULT_PREFIX && lines.length > 1) {
+    const parsed = parseDsmLine(lines.join(" "));
+    if (parsed) {
+      results.push(parsed);
+    }
+  }
 
   return results;
 }
@@ -986,43 +1093,67 @@ function logDiscordIntentHelp(error) {
   console.error("[discord] 4) Restart this server");
 }
 
+function isDiscordModeChannelConfigured(mode) {
+  const safeMode = mode === "pp57" ? "pp57" : "dsm";
+  const set = safeMode === "pp57" ? DISCORD_SOURCE_CHANNEL_IDS_BY_MODE.pp57 : DISCORD_SOURCE_CHANNEL_IDS_BY_MODE.dsm;
+  return Boolean(set && set.size);
+}
+
+function isDiscordMessageInModeChannel(message, mode) {
+  const safeMode = mode === "pp57" ? "pp57" : "dsm";
+  const channelId = String(message?.channelId || "").trim();
+  const parentId = String(message?.channel?.parentId || "").trim();
+  if (channelId && DISCORD_SOURCE_CHANNEL_MODES.get(channelId) === safeMode) {
+    return true;
+  }
+  if (parentId && DISCORD_SOURCE_CHANNEL_MODES.get(parentId) === safeMode) {
+    return true;
+  }
+  return false;
+}
+
 function getDiscordTierBoardMode(message) {
   if (!message) {
     return null;
   }
 
-  const guildName = String(message.guild?.name || "");
-  const guildLower = guildName.toLowerCase();
-  const guildToken = guildLower.replace(/[^a-z0-9]/g, "");
-  const guildMode =
-    guildToken.includes("pp57") || guildLower.includes("pp57")
-      ? "pp57"
-      : guildToken.includes("diamondspearmace") || guildLower.includes("diamond spear mace")
-        ? "dsm"
-        : null;
-
   const channelId = String(message.channelId || "").trim();
-  if (!channelId) {
-    return guildMode;
-  }
-
-  const byChannel = DISCORD_SOURCE_CHANNEL_MODES.get(channelId) || null;
+  const byChannel = channelId ? DISCORD_SOURCE_CHANNEL_MODES.get(channelId) || null : null;
   const parentId = String(message.channel?.parentId || "").trim();
   const byParent = parentId ? DISCORD_SOURCE_CHANNEL_MODES.get(parentId) || null : null;
   const byAnyChannel = byChannel || byParent;
+
+  const guildId = String(message.guildId || message.guild?.id || "").trim();
+  const guildModeById =
+    guildId && DISCORD_GUILD_ID_PP57 && guildId === DISCORD_GUILD_ID_PP57
+      ? "pp57"
+      : guildId && DISCORD_GUILD_ID_DSM && guildId === DISCORD_GUILD_ID_DSM
+        ? "dsm"
+        : null;
+
+  const guildName = String(message.guild?.name || "");
+  const guildLower = guildName.toLowerCase();
+  const guildToken = guildLower.replace(/[^a-z0-9]/g, "");
+  const guildModeByName =
+    guildToken.includes("pp57") || guildLower.includes("pp57")
+      ? "pp57"
+      : guildToken.includes("dsm") || guildLower.includes("dsm") || guildToken.includes("diamondspearmace") || guildLower.includes("diamond spear mace")
+        ? "dsm"
+        : null;
   const matchesGuild = DISCORD_SOURCE_GUILD_IDS.size
-    ? Boolean(message.guildId) && DISCORD_SOURCE_GUILD_IDS.has(message.guildId)
+    ? Boolean(guildId) && DISCORD_SOURCE_GUILD_IDS.has(guildId)
     : false;
 
-  if (!byAnyChannel && !matchesGuild && !guildMode) {
+  const mode = byAnyChannel || guildModeById || guildModeByName || (matchesGuild ? "dsm" : null);
+  if (!mode) {
     return null;
   }
 
-  if (guildMode) {
-    return guildMode;
+  if (isDiscordModeChannelConfigured(mode) && !isDiscordMessageInModeChannel(message, mode)) {
+    return null;
   }
 
-  return byAnyChannel || "dsm";
+  return mode;
 }
 
 function startDiscordBridge() {
@@ -1099,7 +1230,26 @@ function startDiscordBridge() {
       return;
     }
 
-    await applyDiscordTierBoardResults(mode, parsedResults, `Discord message ${message.id}`);
+    const guildName = String(message.guild?.name || "").trim();
+    const guildId = String(message.guildId || "").trim();
+    const channelName = String(message.channel?.name || "").trim();
+    const channelId = String(message.channelId || "").trim();
+    const sourceLabelParts = ["Discord"];
+    if (guildName) {
+      sourceLabelParts.push(`"${guildName}"`);
+    }
+    if (guildId) {
+      sourceLabelParts.push(`(${guildId})`);
+    }
+    if (channelName) {
+      sourceLabelParts.push(`#${channelName}`);
+    }
+    if (channelId) {
+      sourceLabelParts.push(`(${channelId})`);
+    }
+    sourceLabelParts.push(`message ${message.id}`);
+
+    await applyDiscordTierBoardResults(mode, parsedResults, sourceLabelParts.join(" "));
   });
 
   client.login(DISCORD_BOT_TOKEN).catch((error) => {
